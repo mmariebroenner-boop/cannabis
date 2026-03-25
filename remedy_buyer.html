@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Buyer Access — Test Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+    --black:        #080d14;
+    --navy:         #0a1628;
+    --navy-mid:     #0f1c2e;
+    --navy-light:   #162436;
+    --surface:      #0d1829;
+    --surface-alt:  #111f30;
+    --green:        #00c853;
+    --green-light:  #69ff9e;
+    --green-dim:    rgba(0,200,83,0.12);
+    --green-border: rgba(0,200,83,0.30);
+    --white:        #ffffff;
+    --text:         #ffffff;
+    --text-dim:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --border:       rgba(255,255,255,0.08);
+    --border-light: rgba(255,255,255,0.05);
+    --card:         #0f1c2e;
+    --card-alt:     #162436;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--black); color: var(--white); line-height: 1.6; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 68px;
+    background: rgba(8,13,20,0.97); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,200,83,0.25);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .nav-logo-mark { width: 36px; height: 36px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: var(--green); }
+  .nav-logo-text { font-size: 15px; font-weight: 700; color: var(--white); line-height: 1.2; }
+  .nav-logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--green-light); letter-spacing: 1.5px; text-transform: uppercase; }
+  .nav-right { display: flex; align-items: center; gap: 20px; }
+  .nav-login { color: rgba(255,255,255,0.65); text-decoration: none; font-size: 13.5px; font-weight: 500; transition: color 0.2s; }
+  .nav-login:hover { color: var(--green-light); }
+  .nav-cta { background: var(--green); color: var(--black); font-weight: 700; font-size: 13.5px; padding: 9px 22px; border-radius: 6px; text-decoration: none; transition: background 0.2s; }
+  .nav-cta:hover { background: var(--gold-light); }
+
+  /* HERO */
+  .hero {
+    min-height: 72vh;
+    background: linear-gradient(160deg, var(--navy) 0%, var(--black) 60%, #040810 100%);
+    display: flex; align-items: center; justify-content: center;
+    padding: 120px 48px 80px; text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 60%, rgba(0,200,83,0.12), transparent);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 720px; position: relative; z-index: 1; }
+  .hero-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,200,83,0.15); border: 1px solid rgba(0,200,83,0.35);
+    color: var(--green-light); font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .hero h1 { font-size: clamp(30px, 4vw, 52px); font-weight: 800; color: var(--white); line-height: 1.1; margin-bottom: 20px; }
+  .hero h1 em { font-style: normal; color: var(--green); }
+  .hero-desc { font-size: 17px; color: rgba(255,255,255,0.60); margin-bottom: 36px; line-height: 1.75; }
+  .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: var(--gold); color: var(--green); font-weight: 700; font-size: 15px; padding: 14px 32px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: background 0.2s, transform 0.2s; }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-outline { background: transparent; color: rgba(255,255,255,0.75); font-weight: 600; font-size: 14px; padding: 13px 24px; border-radius: 8px; text-decoration: none; border: 1px solid rgba(255,255,255,0.22); transition: border-color 0.2s, color 0.2s; }
+  .btn-outline:hover { border-color: var(--green-light); color: var(--green-light); }
+
+  /* CATALOGUE TEASER */
+  .catalogue-section { padding: 88px 48px; background: var(--card); }
+  .section-inner { max-width: 1140px; margin: 0 auto; }
+  .section-label { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--green); margin-bottom: 12px; }
+  .section-title { font-size: clamp(24px, 3vw, 36px); font-weight: 800; color: var(--white); line-height: 1.2; margin-bottom: 14px; }
+  .section-title em { font-style: normal; color: var(--green); }
+  .section-sub { font-size: 15.5px; color: var(--text-dim); max-width: 560px; line-height: 1.7; margin-bottom: 48px; }
+
+  .strain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+  /* VISIBLE CARD */
+  .strain-card { border: 1px solid var(--border); border-radius: 16px; padding: 28px 26px; background: var(--navy-mid); transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; }
+  .strain-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .strain-card.tier-1::before { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .strain-card.tier-2::before { background: linear-gradient(90deg, var(--green-mid), var(--green-light)); }
+  .strain-card:hover { box-shadow: 0 12px 40px rgba(8,13,20,0.10); border-color: #c8d9cc; transform: translateY(-3px); }
+  .strain-ref { font-size: 10.5px; font-weight: 700; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+  .strain-name { font-size: 19px; font-weight: 800; color: var(--white); margin-bottom: 4px; }
+  .strain-type { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .strain-type.hybrid { color: var(--green); }
+  .strain-type.sativa { color: #c47c00; }
+  .strain-specs { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .spec-pill { background: var(--navy-mid); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 600; color: var(--white); }
+  .spec-pill.thc { background: #0d1f14; border-color: #00c853; color: var(--green); }
+  .strain-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 16px; }
+  .strain-footer { padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .strain-stock { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+  .strain-stock strong { color: var(--green); }
+  .price-locked { font-size: 12px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+
+  /* LOCKED CARD */
+  .strain-card-locked {
+    border: 1px dashed #1a2a3a; border-radius: 16px; padding: 28px 26px;
+    background: #090e14; position: relative; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .strain-card-locked:hover { border-color: rgba(0,200,83,0.50); }
+  .locked-blur { filter: blur(4px); opacity: 0.45; user-select: none; pointer-events: none; }
+  .locked-overlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 10px;
+    background: rgba(9,14,20,0.75); backdrop-filter: blur(3px);
+    border-radius: 16px;
+  }
+  .lock-icon { font-size: 28px; }
+  .lock-text { font-size: 13px; font-weight: 700; color: var(--text-dim); text-align: center; line-height: 1.4; }
+  .lock-cta {
+    font-size: 12px; font-weight: 700; background: var(--green); color: var(--white);
+    padding: 8px 18px; border-radius: 6px; text-decoration: none; margin-top: 4px;
+    transition: background 0.2s;
+  }
+  .lock-cta:hover { background: var(--green-mid); }
+
+  /* UNLOCK BANNER */
+  .unlock-banner {
+    margin-top: 40px; background: linear-gradient(135deg, var(--green), #060b11);
+    border-radius: 16px; padding: 36px 40px;
+    display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  }
+  .unlock-text h3 { font-size: 20px; font-weight: 800; color: var(--white); margin-bottom: 6px; }
+  .unlock-text p { font-size: 14px; color: rgba(255,255,255,0.60); }
+
+  /* FORM SECTION */
+  .form-section { padding: 88px 48px; background: var(--navy-mid); }
+  .form-inner { max-width: 760px; margin: 0 auto; }
+  .form-card { background: var(--navy); border-radius: 20px; padding: 48px; border: 1px solid var(--border); }
+  .form-title { font-size: 26px; font-weight: 800; color: var(--white); margin-bottom: 8px; }
+  .form-sub { font-size: 14.5px; color: var(--text-dim); margin-bottom: 36px; line-height: 1.65; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 7px; margin-bottom: 20px; }
+  .form-group label { font-size: 13px; font-weight: 700; color: var(--white); letter-spacing: 0.3px; }
+  .form-group label span { color: var(--green); }
+  .form-group input, .form-group select, .form-group textarea {
+    border: 1.5px solid var(--border); border-radius: 8px; padding: 11px 14px;
+    font-size: 14px; font-family: inherit; color: var(--white); background: var(--card);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green-light); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .form-group select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300c853' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 2px dashed rgba(255,255,255,0.15); border-radius: 10px; padding: 28px 20px;
+    text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    background: var(--navy-mid);
+  }
+  .upload-zone:hover { border-color: var(--green-light); background: #0d1f14; }
+  .upload-zone input { display: none; }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-title { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .upload-hint { font-size: 12px; color: var(--text-muted); }
+  .upload-types { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+  .form-divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+  .form-section-title { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--grey-light); }
+
+  .submit-area { margin-top: 32px; display: flex; align-items: flex-start; gap: 20px; flex-wrap: wrap; }
+  .submit-btn {
+    background: var(--green); color: var(--white); font-weight: 700; font-size: 15px;
+    padding: 15px 36px; border-radius: 8px; border: none; cursor: pointer;
+    font-family: inherit; display: flex; align-items: center; gap: 8px;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .submit-btn:hover { background: var(--green-mid); transform: translateY(-2px); }
+  .submit-note { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; max-width: 320px; }
+
+  /* CLICK-WRAP AGREEMENT */
+  .clickwrap {
+    margin-top: 24px; margin-bottom: 4px;
+    padding: 18px 20px;
+    background: var(--navy-mid);
+    border: 1px solid var(--green-border);
+    border-radius: 8px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .clickwrap input[type="checkbox"] {
+    appearance: none; -webkit-appearance: none;
+    width: 20px; height: 20px; min-width: 20px;
+    border: 2px solid rgba(0,200,83,0.5);
+    border-radius: 4px;
+    background: var(--card);
+    cursor: pointer; margin-top: 2px;
+    transition: background 0.2s, border-color 0.2s;
+    position: relative;
+  }
+  .clickwrap input[type="checkbox"]:checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .clickwrap input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute; top: -1px; left: 3px;
+    font-size: 14px; color: var(--black); font-weight: 900;
+  }
+  .clickwrap label {
+    font-size: 13px; color: var(--text-dim); line-height: 1.65; cursor: pointer;
+  }
+  .clickwrap label a { color: var(--green); text-decoration: underline; }
+  .clickwrap label a:hover { color: var(--green-light); }
+  .clickwrap-error {
+    font-size: 12px; color: #ff5252; margin-top: 6px; display: none;
+  }
+
+  /* WHAT TO EXPECT */
+  .expect-section { padding: 64px 48px; background: var(--card); }
+  .expect-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 36px; }
+  .expect-step { text-align: center; padding: 24px 16px; }
+  .expect-num { width: 44px; height: 44px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 17px; font-weight: 800; color: var(--white); }
+  .expect-title { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .expect-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  /* FOOTER */
+  footer { background: var(--navy); border-top: 1px solid var(--border); color: rgba(255,255,255,0.40); padding: 28px 48px; font-size: 12.5px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  footer a { color: var(--green-light); text-decoration: none; }
+  footer a:hover { color: var(--white); }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s, transform 0.6s; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 780px) {
+    nav { padding: 0 20px; }
+    .hero { padding: 100px 24px 60px; }
+    .catalogue-section, .form-section, .expect-section { padding: 60px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+    .form-card { padding: 28px 24px; }
+    .expect-steps { grid-template-columns: 1fr 1fr; }
+    .unlock-banner { text-align: center; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark">RE</div>
+    <div class="nav-logo-text">Test Platform<span>Buyer Access</span></div>
+  </a>
+  <div class="nav-right">
+    <a href="remedy_login.html" class="nav-login">Already a member? Sign in →</a>
+    <a href="#apply" class="nav-cta">Apply for Access</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-label">🏢 &nbsp; Licensed Importers & Distributors</div>
+    <h1>Unlock our full <em>verified catalogue.</em></h1>
+    <p class="hero-desc">We work exclusively with licensed operators. Apply below — once your import licence is verified, you'll receive full access to all strains, COA documents, and wholesale pricing.</p>
+    <div class="hero-actions">
+      <a href="#apply" class="btn-primary">Apply for Full Access ›</a>
+      <a href="remedy_login.html" class="btn-outline">Sign In</a>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOGUE TEASER -->
+<section class="catalogue-section" id="catalogue">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label">2026 Catalogue Preview</div>
+      <h2 class="section-title">A glimpse of what's <em>waiting for you</em></h2>
+      <p class="section-sub">Below is a preview of three strains from our verified catalogue. Apply for access to unlock all 7 strains — including full THC/terpene profiles, COA documents, and wholesale pricing.</p>
+    </div>
+
+    <div class="strain-grid">
+
+      <!-- VISIBLE 1 -->
+      <div class="strain-card tier-1 reveal">
+        <div class="strain-ref">RE-TH-001</div>
+        <div class="strain-name">Dark Matter Mints</div>
+        <div class="strain-type hybrid">Hybrid</div>
+        <div class="strain-specs">
+          <span class="spec-pill thc">THC 30.4%</span>
+          <span class="spec-pill">HPLC Verified</span>
+          <span class="spec-pill">Full Safety Panel</span>
+        </div>
+        <div class="strain-desc">Premium hybrid — our highest-THC strain with a complex minty terpene profile. Exceptional market performance in AU and CA markets.</div>
+        <div class="strain-footer">
+          <div class="strain-stock">Stock: <strong>Available</strong></div>
+          <div class="price-locked">🔒 Price: Members Only</div>
+        </div>
+      </div>
+
+      <!-- VISIBLE 2 -->
+      <div class="strain-card tier-1 reveal">
+        <div class="strain-ref">RE-TH-005</div>
+        <div class="strain-name">LA Banana</div>
+        <div class="strain-type hybrid">Hybrid</div>
+        <div class="strain-specs">
+          <span class="spec-pill thc">THC 23.6%</span>
+          <span class="spec-pill">HPLC Verified</span>
+          <span class="spec-pill">140kg Available</span>
+        </div>
+        <div class="strain-desc">High-volume availability hybrid with a distinctive tropical banana profile — ideal for buyers requiring consistent large-order fulfillment.</div>
+        <div class="strain-footer">
+          <div class="strain-stock">Stock: <strong>140 kg</strong></div>
+          <div class="price-locked">🔒 Price: Members Only</div>
+        </div>
+      </div>
+
+      <!-- VISIBLE 3 -->
+      <div class="strain-card tier-2 reveal">
+        <div class="strain-ref">RE-TH-007</div>
+        <div class="strain-name">Flash Mob</div>
+        <div class="strain-type hybrid">Hybrid</div>
+        <div class="strain-specs">
+          <span class="spec-pill thc">THC 27.9%</span>
+          <span class="spec-pill">HPLC Verified</span>
+          <span class="spec-pill">New 2026</span>
+        </div>
+        <div class="strain-desc">Newest addition to our 2026 catalogue. Strong THC with rich myrcene and caryophyllene profile — high buyer demand since listing.</div>
+        <div class="strain-footer">
+          <div class="strain-stock">Stock: <strong>70 kg</strong></div>
+          <div class="price-locked">🔒 Price: Members Only</div>
+        </div>
+      </div>
+
+      <!-- LOCKED 4 -->
+      <div class="strain-card-locked reveal">
+        <div class="locked-blur">
+          <div class="strain-ref">RE-TH-002</div>
+          <div class="strain-name">Oh My God</div>
+          <div class="strain-type sativa">Sativa-Dominant</div>
+          <div class="strain-specs"><span class="spec-pill thc">THC 28.8%</span><span class="spec-pill">HPLC Verified</span></div>
+          <div class="strain-desc">Potent sativa-dominant with citrus profile. High demand in medical dispensary channels.</div>
+        </div>
+        <div class="locked-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-text">Members Only<br><small style="font-weight:400;font-size:11px">Apply to unlock full details</small></div>
+          <a href="#apply" class="lock-cta">Apply for Access</a>
+        </div>
+      </div>
+
+      <!-- LOCKED 5 -->
+      <div class="strain-card-locked reveal">
+        <div class="locked-blur">
+          <div class="strain-ref">RE-TH-003</div>
+          <div class="strain-name">ML Peachy</div>
+          <div class="strain-type hybrid">Hybrid</div>
+          <div class="strain-specs"><span class="spec-pill thc">THC 26.4%</span><span class="spec-pill">50kg Available</span></div>
+          <div class="strain-desc">Balanced hybrid with distinctive peachy aromatic profile. Popular across therapeutic applications.</div>
+        </div>
+        <div class="locked-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-text">Members Only<br><small style="font-weight:400;font-size:11px">Apply to unlock full details</small></div>
+          <a href="#apply" class="lock-cta">Apply for Access</a>
+        </div>
+      </div>
+
+      <!-- LOCKED 6 -->
+      <div class="strain-card-locked reveal">
+        <div class="locked-blur">
+          <div class="strain-ref">RE-TH-004</div>
+          <div class="strain-name">The Cheetah Girls</div>
+          <div class="strain-type">Indica-Dominant</div>
+          <div class="strain-specs"><span class="spec-pill thc">THC 25.1%</span><span class="spec-pill">HPLC Verified</span></div>
+          <div class="strain-desc">Consistent indica-dominant with established terpene profile. Relaxation-focused dispensary favourite.</div>
+        </div>
+        <div class="locked-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-text">Members Only<br><small style="font-weight:400;font-size:11px">Apply to unlock full details</small></div>
+          <a href="#apply" class="lock-cta">Apply for Access</a>
+        </div>
+      </div>
+
+      <!-- LOCKED 7 -->
+      <div class="strain-card-locked reveal" style="grid-column: span 1;">
+        <div class="locked-blur">
+          <div class="strain-ref">RE-TH-006</div>
+          <div class="strain-name">Cherry Punch</div>
+          <div class="strain-type">Indica-Dominant</div>
+          <div class="strain-specs"><span class="spec-pill thc">THC 22.8%</span><span class="spec-pill">Cherry Profile</span></div>
+          <div class="strain-desc">Cherry-forward indica with stable cannabinoid ratios. Value-tier entry point with strong compliance credentials.</div>
+        </div>
+        <div class="locked-overlay">
+          <div class="lock-icon">🔒</div>
+          <div class="lock-text">Members Only<br><small style="font-weight:400;font-size:11px">Apply to unlock full details</small></div>
+          <a href="#apply" class="lock-cta">Apply for Access</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- UNLOCK BANNER -->
+    <div class="unlock-banner reveal">
+      <div class="unlock-text">
+        <h3>4 more strains — fully documented, export-ready, priced for wholesale.</h3>
+        <p>Full COA library, wholesale pricing, and dedicated account access. Verified buyers only.</p>
+      </div>
+      <a href="#apply" class="btn-primary" style="flex-shrink:0;">Unlock Full Catalogue ›</a>
+    </div>
+  </div>
+</section>
+
+<!-- APPLICATION FORM -->
+<section class="form-section" id="apply">
+  <div class="form-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:40px;">
+      <div class="section-label" style="display:block;text-align:center;">Buyer Application</div>
+      <h2 class="section-title" style="max-width:none;">Apply for Verified Buyer Access</h2>
+      <p style="font-size:15px;color:var(--grey-dark);max-width:540px;margin:0 auto;line-height:1.7;">All applications are reviewed by our compliance team. Approval typically takes up to 48 hours. We'll contact you by email with your result.</p>
+    </div>
+    <div class="form-card reveal">
+      <form id="buyerForm" onsubmit="handleSubmit(event)">
+
+        <div class="form-section-title">Company Information</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company / Business Name <span>*</span></label>
+            <input type="text" placeholder="Your registered company name" required />
+          </div>
+          <div class="form-group">
+            <label>Country of Operation <span>*</span></label>
+            <select required>
+              <option value="">Select country…</option>
+              <option>Australia</option>
+              <option>Canada</option>
+              <option>Germany</option>
+              <option>United Kingdom</option>
+              <option>Netherlands</option>
+              <option>New Zealand</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Contact Name <span>*</span></label>
+            <input type="text" placeholder="Full name" required />
+          </div>
+          <div class="form-group">
+            <label>Business Email <span>*</span></label>
+            <input type="email" placeholder="you@company.com" required />
+          </div>
+        </div>
+
+        <hr class="form-divider" />
+        <div class="form-section-title">Licence & Regulatory Details</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Import Licence Number <span>*</span></label>
+            <input type="text" placeholder="Your import licence number" required />
+          </div>
+          <div class="form-group">
+            <label>Issuing Regulatory Authority <span>*</span></label>
+            <input type="text" placeholder="e.g. TGA, Health Canada, BfArM" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Expected Order Volume <span>*</span></label>
+          <select required>
+            <option value="">Select volume range…</option>
+            <option>30–50 kg per order</option>
+            <option>50–100 kg per order</option>
+            <option>100–300 kg per order</option>
+            <option>300–500 kg per order</option>
+            <option>500 kg+ per order</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Additional Notes (optional)</label>
+          <textarea placeholder="Any specific strains, requirements, or questions you'd like us to know…"></textarea>
+        </div>
+
+        <hr class="form-divider" />
+        <div class="form-section-title">Document Upload</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Import Licence (PDF or image) <span>*</span></label>
+            <label class="upload-zone">
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" />
+              <div class="upload-icon">📄</div>
+              <div class="upload-title">Upload Import Licence</div>
+              <div class="upload-hint">Click to browse or drag and drop</div>
+              <div class="upload-types">PDF · JPG · PNG — max 10MB</div>
+            </label>
+          </div>
+          <div class="form-group">
+            <label>Business Registration <span>*</span></label>
+            <label class="upload-zone">
+              <input type="file" accept=".pdf,.jpg,.jpeg,.png" />
+              <div class="upload-icon">🏢</div>
+              <div class="upload-title">Upload Business Registration</div>
+              <div class="upload-hint">Click to browse or drag and drop</div>
+              <div class="upload-types">PDF · JPG · PNG — max 10MB</div>
+            </label>
+          </div>
+        </div>
+
+        <div class="clickwrap">
+          <input type="checkbox" id="buyerAgree" />
+          <label for="buyerAgree">
+            I have read and agree to the <a href="Platform_Terms_and_Confidentiality.docx" download>Platform Terms of Use &amp; Confidentiality Agreement</a>.
+            I understand that all supplier identities and platform information are strictly confidential, and I must not disclose them to any third party.
+            I confirm that I am a licensed operator and that all documents submitted are accurate and current.
+          </label>
+        </div>
+        <p class="clickwrap-error" id="buyerAgreeError">You must agree to the Terms of Use before submitting.</p>
+
+        <div class="submit-area" style="margin-top: 20px;">
+          <button type="submit" class="submit-btn">
+            Submit Application ›
+          </button>
+          <p class="submit-note">All applications are reviewed by our compliance team within 48 hours. Documents are held securely and never shared with third parties.</p>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT TO EXPECT -->
+<section class="expect-section">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label">What Happens Next</div>
+      <h2 class="section-title">After you <em>apply</em></h2>
+    </div>
+    <div class="expect-steps">
+      <div class="expect-step reveal">
+        <div class="expect-num">1</div>
+        <div class="expect-title">Application Received</div>
+        <div class="expect-desc">You'll receive an immediate confirmation email. Your documents enter our review queue.</div>
+      </div>
+      <div class="expect-step reveal">
+        <div class="expect-num">2</div>
+        <div class="expect-title">Licence Verification</div>
+        <div class="expect-desc">Our compliance team verifies your import licence and business registration against public records. Up to 48 hours.</div>
+      </div>
+      <div class="expect-step reveal">
+        <div class="expect-num">3</div>
+        <div class="expect-title">Approval Email</div>
+        <div class="expect-desc">If approved, you'll receive login credentials by email to access your full buyer portal.</div>
+      </div>
+      <div class="expect-step reveal">
+        <div class="expect-num">4</div>
+        <div class="expect-title">Full Catalogue Access</div>
+        <div class="expect-desc">Log in to view all 7 strains, full COA documents, wholesale pricing, and place enquiries.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Test Platform · Bangkok, Thailand</span>
+  <span><a href="index.html">Home</a> &nbsp;·&nbsp; <a href="remedy_select.html">Change Role</a> &nbsp;·&nbsp; <a href="remedy_login.html">Member Login</a></span>
+  <span>Licensed Buyers Only · All documents confidential</span>
+</footer>
+
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // File upload label feedback
+  document.querySelectorAll('.upload-zone input').forEach(input => {
+    input.addEventListener('change', e => {
+      const zone = e.target.closest('.upload-zone');
+      const file = e.target.files[0];
+      if (file) {
+        zone.querySelector('.upload-title').textContent = file.name;
+        zone.querySelector('.upload-hint').textContent = 'File selected ✓';
+        zone.style.borderColor = 'var(--green-light)';
+        zone.style.background = '#0d1f14';
+      }
+    });
+  });
+
+  // Form submit → redirect to pending page
+  function handleSubmit(e) {
+    e.preventDefault();
+    const checkbox = document.getElementById('buyerAgree');
+    const errMsg   = document.getElementById('buyerAgreeError');
+    if (!checkbox.checked) {
+      errMsg.style.display = 'block';
+      checkbox.closest('.clickwrap').style.borderColor = '#ff5252';
+      checkbox.closest('.clickwrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    errMsg.style.display = 'none';
+    window.location.href = 'remedy_pending.html?role=buyer';
+  }
+</script>
+</body>
+</html>

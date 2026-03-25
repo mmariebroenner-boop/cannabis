@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Buyer Portal — Test Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+    --black:        #080d14;
+    --navy:         #0a1628;
+    --navy-mid:     #0f1c2e;
+    --navy-light:   #162436;
+    --surface:      #0d1829;
+    --surface-alt:  #111f30;
+    --green:        #00c853;
+    --green-light:  #69ff9e;
+    --green-dim:    rgba(0,200,83,0.12);
+    --green-border: rgba(0,200,83,0.30);
+    --white:        #ffffff;
+    --text:         #ffffff;
+    --text-dim:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --border:       rgba(255,255,255,0.08);
+    --border-light: rgba(255,255,255,0.05);
+    --card:         #0f1c2e;
+    --card-alt:     #162436;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--navy-mid); color: var(--white); line-height: 1.6; }
+
+  /* TOP BAR */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px;
+    background: var(--green); border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; padding: 0 28px; gap: 20px;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .topbar-mark { width: 32px; height: 32px; background: var(--gold); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: var(--green); }
+  .topbar-name { font-size: 14px; font-weight: 700; color: var(--white); }
+  .topbar-name span { color: var(--green-light); font-weight: 400; font-size: 11px; margin-left: 6px; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .topbar-badge { background: rgba(0,200,83,0.25); border: 1px solid rgba(0,200,83,0.40); color: #6ee09a; font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
+  .topbar-user { display: flex; align-items: center; gap: 10px; }
+  .user-avatar { width: 32px; height: 32px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--white); }
+  .user-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.80); }
+  .logout-btn { font-size: 12px; color: rgba(255,255,255,0.40); text-decoration: none; transition: color 0.2s; }
+  .logout-btn:hover { color: rgba(255,255,255,0.75); }
+
+  /* LAYOUT */
+  .layout { display: flex; padding-top: 60px; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--card);
+    border-right: 1px solid var(--border);
+    position: fixed; top: 60px; left: 0; bottom: 0;
+    overflow-y: auto; padding: 20px 0;
+  }
+  .sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); padding: 0 12px; margin-bottom: 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 600;
+    color: var(--text-dim); text-decoration: none; transition: background 0.15s, color 0.15s;
+    cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: inherit;
+  }
+  .nav-item:hover { background: var(--navy-mid); color: var(--white); }
+  .nav-item.active { background: #0d2018; color: var(--green); }
+  .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--green); color: var(--white); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+
+  /* MAIN */
+  .main { margin-left: 220px; flex: 1; padding: 32px 36px; background: var(--black); }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .page-header h1 { font-size: 22px; font-weight: 800; color: var(--white); }
+  .page-header p { font-size: 13.5px; color: var(--text-muted); margin-top: 3px; }
+  .header-actions { display: flex; gap: 10px; }
+  .btn-sm { font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 7px; text-decoration: none; border: none; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+  .btn-green { background: var(--green); color: var(--white); }
+  .btn-green:hover { background: var(--green-mid); }
+  .btn-outline-sm { background: var(--black); color: var(--white); border: 1.5px solid var(--border); }
+  .btn-outline-sm:hover { border-color: var(--text-muted); }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: var(--navy-mid); border-radius: 12px; padding: 20px 22px; border: 1px solid var(--border); }
+  .stat-card .num { font-size: 26px; font-weight: 800; color: var(--white); line-height: 1; margin-bottom: 4px; }
+  .stat-card .num.green { color: var(--green); }
+  .stat-card .num.gold { color: var(--green); }
+  .stat-card .lbl { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+
+  /* TABS */
+  .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--grey-light); margin-bottom: 24px; }
+  .tab { padding: 10px 20px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; }
+  .tab:hover { color: var(--white); }
+  .tab.active { color: var(--green); border-color: var(--green); }
+
+  /* SECTION */
+  .section-block { display: none; }
+  .section-block.active { display: block; }
+
+  /* STRAIN GRID */
+  .strain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+  .strain-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; transition: box-shadow 0.2s, transform 0.2s; position: relative; overflow: hidden; }
+  .strain-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .strain-card.t1::before { background: linear-gradient(90deg, var(--gold), var(--gold-light)); }
+  .strain-card.t2::before { background: linear-gradient(90deg, var(--green-mid), var(--green-light)); }
+  .strain-card.t3::before { background: linear-gradient(90deg, #6b8e74, #4a6a80); }
+  .strain-card:hover { box-shadow: 0 8px 28px rgba(8,13,20,0.10); transform: translateY(-2px); }
+  .sc-ref { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+  .sc-name { font-size: 17px; font-weight: 800; color: var(--white); margin-bottom: 3px; }
+  .sc-type { font-size: 11.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+  .sc-type.hybrid { color: var(--green); }
+  .sc-type.sativa { color: #c47c00; }
+  .sc-type.indica { color: #5a3e8a; }
+  .sc-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .pill { font-size: 11.5px; font-weight: 600; padding: 4px 10px; border-radius: 20px; background: var(--navy-mid); border: 1px solid var(--border); color: var(--white); }
+  .pill.thc { background: #0d1f14; border-color: #00c853; color: var(--green); }
+  .pill.gold { background: #fdf8ee; border-color: #e8d59a; color: #8a6820; }
+  .sc-desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.55; margin-bottom: 14px; }
+  .sc-terpenes { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+  .sc-terpenes strong { color: var(--text-dim); }
+  .sc-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); gap: 8px; flex-wrap: wrap; }
+  .sc-stock { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+  .sc-stock strong { color: var(--green); }
+  .sc-price { font-size: 13px; font-weight: 800; color: var(--white); }
+  .sc-price .unit { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .sc-actions { display: flex; gap: 7px; }
+  .btn-coa { font-size: 11.5px; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: var(--navy-mid); border: 1.5px solid var(--border); color: var(--text-dim); text-decoration: none; transition: background 0.2s; cursor: pointer; }
+  .btn-coa:hover { background: var(--grey-light); }
+  .btn-enquire { font-size: 11.5px; font-weight: 700; padding: 6px 14px; border-radius: 6px; background: var(--green); border: none; color: var(--white); cursor: pointer; font-family: inherit; transition: background 0.2s; }
+  .btn-enquire:hover { background: var(--green-mid); }
+
+  /* ENQUIRY TABLE */
+  .table-wrap { background: var(--navy); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 14px 18px; background: var(--navy-mid); border-bottom: 1px solid var(--border); text-align: left; }
+  td { padding: 14px 18px; font-size: 13.5px; border-bottom: 1px solid var(--border); color: rgba(255,255,255,0.85); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--navy-light); }
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.3px; }
+  .status-pending { background: #fff8e1; color: #b8860b; border: 1px solid #f0d890; }
+  .status-replied { background: #0d2018; color: var(--green); border: 1px solid #00c853; }
+  .status-review { background: #f0eaff; color: #6b3fa8; border: 1px solid #d0baf5; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.60); align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 18px; padding: 36px; max-width: 520px; width: 90%;
+    max-height: 90vh; overflow-y: auto;
+    animation: popUp 0.25s ease;
+  }
+  @keyframes popUp { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 20px; font-weight: 800; color: var(--white); }
+  .modal-close { background: none; border: none; font-size: 22px; color: var(--text-muted); cursor: pointer; line-height: 1; padding: 0; }
+  .modal-strain-info { background: var(--navy-mid); border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; font-size: 13px; color: var(--text-dim); }
+  .modal-strain-info strong { display: block; font-size: 15px; font-weight: 800; color: var(--white); margin-bottom: 3px; }
+  .m-form-group { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
+  .m-form-group label { font-size: 12.5px; font-weight: 700; color: var(--white); }
+  .m-form-group input, .m-form-group select, .m-form-group textarea { border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 13px; font-size: 14px; font-family: inherit; color: var(--white); background: var(--card); outline: none; transition: border-color 0.2s; }
+  .m-form-group input:focus, .m-form-group select:focus, .m-form-group textarea:focus { border-color: var(--green-light); }
+  .m-form-group textarea { resize: vertical; min-height: 80px; }
+  .modal-submit { width: 100%; padding: 13px; background: var(--green); color: var(--white); font-size: 14px; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+  .modal-submit:hover { background: var(--green-mid); }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 60px 24px; }
+  .empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .empty-title { font-size: 17px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .empty-desc { font-size: 14px; color: var(--text-muted); }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 20px; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 580px) { .stats-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">
+    <div class="topbar-mark">RE</div>
+    <div class="topbar-name">Test Platform <span>Buyer Portal</span></div>
+  </a>
+  <div class="topbar-right">
+    <div class="topbar-badge">Verified Buyer</div>
+    <div class="topbar-user">
+      <div class="user-avatar">M</div>
+      <div class="user-name">My Account</div>
+      <a href="remedy_login.html" class="logout-btn">Sign out</a>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Menu</div>
+      <button class="nav-item active" onclick="showTab('catalogue')"><span class="icon">🌿</span> Catalogue</button>
+      <button class="nav-item" onclick="showTab('enquiries')"><span class="icon">📋</span> My Enquiries <span class="nav-badge" id="enquiryCount">2</span></button>
+      <button class="nav-item" onclick="showTab('documents')"><span class="icon">📄</span> COA Documents</button>
+      <button class="nav-item" onclick="showTab('account')"><span class="icon">👤</span> My Account</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Support</div>
+      <a href="mailto:buyers@testplatform.com" class="nav-item"><span class="icon">💬</span> Contact Us</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- CATALOGUE TAB -->
+    <div class="section-block active" id="tab-catalogue">
+      <div class="page-header">
+        <div>
+          <h1>Strain Catalogue</h1>
+          <p>7 verified strains · All COA documents available · Wholesale pricing shown</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-sm btn-outline-sm" onclick="showTab('documents')">📥 Download All COAs</button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="num green">7</div><div class="lbl">Strains Available</div></div>
+        <div class="stat-card"><div class="num">260<span style="font-size:14px;font-weight:600"> kg</span></div><div class="lbl">Total Stock</div></div>
+        <div class="stat-card"><div class="num gold">30.4<span style="font-size:14px;font-weight:600">%</span></div><div class="lbl">Peak THC</div></div>
+        <div class="stat-card"><div class="num green">100<span style="font-size:14px;font-weight:600">%</span></div><div class="lbl">Lab Certified</div></div>
+      </div>
+
+      <!-- STRAIN CARDS -->
+      <div class="strain-grid">
+
+        <div class="strain-card t1">
+          <div class="sc-ref">RE-TH-001</div>
+          <div class="sc-name">Dark Matter Mints</div>
+          <div class="sc-type hybrid">Hybrid</div>
+          <div class="sc-pills"><span class="pill thc">THC 30.4%</span><span class="pill">CBD &lt;0.5%</span><span class="pill gold">Top Tier</span></div>
+          <div class="sc-desc">Premium hybrid, our highest-THC strain. Complex minty terpene profile. Exceptional performance across AU and CA medical markets.</div>
+          <div class="sc-terpenes"><strong>Key terpenes:</strong> Limonene · Caryophyllene · Myrcene</div>
+          <div class="sc-footer">
+            <div><div class="sc-stock">Stock: <strong>Available</strong></div><div class="sc-price">$5.50 <span class="unit">AUD/g</span></div></div>
+            <div class="sc-actions">
+              <a class="btn-coa" href="#">📄 COA</a>
+              <button class="btn-enquire" onclick="openEnquiry('Dark Matter Mints','RE-TH-001','$5.50 AUD/g')">Enquire</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="strain-card t1">
+          <div class="sc-ref">RE-TH-002</div>
+          <div class="sc-name">Oh My God</div>
+          <div class="sc-type sativa">Sativa-Dominant</div>
+          <div class="sc-pills"><span class="pill thc">THC 28.8%</span><span class="pill">CBD &lt;0.5%</span><span class="pill gold">Top Tier</span></div>
+          <div class="sc-desc">Potent sativa-dominant with energising citrus profile. Strong demand in medical dispensary channels internationally.</div>
+          <div class="sc-terpenes"><strong>Key terpenes:</strong> Limonene · Terpinolene · Ocimene</div>
+          <div class="sc-footer">
+            <div><div class="sc-stock">Stock: <strong>Available</strong></div><div class="sc-price">$5.00 <span class="unit">AUD/g</span></div></div>
+            <div class="sc-actions">
+              <a class="btn-coa" href="#">📄 COA</a>
+              <button class="btn-enquire" onclick="openEnquiry('Oh My God','RE-TH-002','$5.00 AUD/g')">Enquire</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="strain-card t2">
+          <div class="sc-ref">RE-TH-007</div>
+          <div class="sc-name">Flash Mob</div>
+          <div class="sc-type hybrid">Hybrid</div>
+          <div class="sc-pills"><span class="pill thc">THC 27.9%</span><span class="pill">CBD &lt;0.5%</span><span class="pill" style="background:#fff8e1;border-color:#f0d890;color:#8a6820;">New 2026</span></div>
+          <div class="sc-desc">Newest addition. Rich myrcene and caryophyllene with strong THC. Full safety panel certified. High initial buyer interest.</div>
+          <div class="sc-terpenes"><strong>Key terpenes:</strong> Myrcene · Caryophyllene · Linalool</div>
+          <div class="sc-footer">
+            <div><div class="sc-stock">Stock: <strong>70 kg</strong></div><div class="sc-price">$4.20 <span class="unit">AUD/g</span></div></div>
+            <div class="sc-actions">
+              <a class="btn-coa" href="#">📄 COA</a>
+              <button class="btn-enquire" onclick="openEnquiry('Flash Mob','RE-TH-007','$4.20 AUD/g')">Enquire</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="strain-card t2">
+          <div class="sc-ref">RE-TH-003</div>
+          <div class="sc-name">ML Peachy</div>
+          <div class="sc-type hybrid">Hybrid</div>
+          <div class="sc-pills"><span class="pill thc">THC 26.4%</span><span class="pill">CBD &lt;0.5%</span></div>
+          <div class="sc-desc">Balanced hybrid with distinctive peachy terpene profile. Broad therapeutic applications. Consistent batch supply.</div>
+          <div class="sc-terpenes"><strong>Key terpenes:</strong> Myrcene · Linalool · Bisabolol</div>
+          <div class="sc-footer">
+            <div><div class="sc-stock">Stock: <strong>50 kg</strong></div><div class="sc-price">$4.60 <span class="unit">AUD/g</span></div></div>
+            <div class="sc-actions">
+              <a class="btn-coa" href="#">📄 COA</a>
+              <button class="btn-enquire" onclick="openEnquiry('ML Peachy','RE-TH-003','$4.60 AUD/g')">Enquire</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="strain-card t2">
+          <div class="sc-ref">RE-TH-004</div>
+          <div class="sc-name">The Cheetah Girls</div>
+          <div class="sc-type indica">Indica-Dominant</div>
+          <div class="sc-pills"><span class="pill thc">THC 25.1%</span><span class="pill">CBD &lt;0.5%</span></div>
+          <div class="sc-desc">Indica-dominant with relaxation-focused terpene profile. Consistent potency across batches. Medical dispensary favourite.</div>
+          <div class="sc-terpenes"><strong>Key terpenes:</strong> Caryophyllene · Humulene · Myrcene</div>
+          <div class="sc-footer">
+            <div><div class="sc-stock">Stock: <strong>Available</strong></div><div class="sc-price">$3.90 <span class="unit">AUD/g</span></div></div>
+            <div class="sc-actions">
+              <a class="btn-coa" href="#">📄 COA</a>
+              <button class="btn-enquire" onclick="openEnquiry('The Cheetah Girls','RE-TH-004','$3.90 AUD/g')">Enquire</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="strain-card t3">
+          <div class="sc-ref">RE-TH-005</div>
+          <div class="sc-name">LA Banana</div>
+          <div class="sc-type hybrid">Hybrid</div>
+          <div class="sc-pills"><span class="pill thc">THC 23.6%</span><span class="pill">140 kg Stock</span></div>
+          <div class="sc-desc">Tropical hybrid — largest available stock. Banana and mango terpene notes. Ideal for high-volume buyers seeking reliable fulfillment.</div>
+          <div class="sc-terpenes"><strong>Key terpenes:</strong> Myrcene · Limonene · Pinene</div>
+          <div class="sc-footer">
+            <div><div class="sc-stock">Stock: <strong>140 kg</strong></div><div class="sc-price">$3.70 <span class="unit">AUD/g</span></div></div>
+            <div class="sc-actions">
+              <a class="btn-coa" href="#">📄 COA</a>
+              <button class="btn-enquire" onclick="openEnquiry('LA Banana','RE-TH-005','$3.70 AUD/g')">Enquire</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="strain-card t3">
+          <div class="sc-ref">RE-TH-006</div>
+          <div class="sc-name">Cherry Punch</div>
+          <div class="sc-type indica">Indica-Dominant</div>
+          <div class="sc-pills"><span class="pill thc">THC 22.8%</span><span class="pill">Value Tier</span></div>
+          <div class="sc-desc">Cherry-forward indica with sweet aromatic profile. Stable cannabinoid ratios. Accessible price point with strong quality credentials.</div>
+          <div class="sc-terpenes"><strong>Key terpenes:</strong> Caryophyllene · Linalool · Myrcene</div>
+          <div class="sc-footer">
+            <div><div class="sc-stock">Stock: <strong>Available</strong></div><div class="sc-price">$3.70 <span class="unit">AUD/g</span></div></div>
+            <div class="sc-actions">
+              <a class="btn-coa" href="#">📄 COA</a>
+              <button class="btn-enquire" onclick="openEnquiry('Cherry Punch','RE-TH-006','$3.70 AUD/g')">Enquire</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:24px;padding:16px 20px;background:var(--white);border-radius:10px;border:1px solid var(--grey-light);font-size:13px;color:var(--grey-dark);">
+        💡 <strong>Volume discounts available:</strong> Tiers from 30kg (−22%) up to 500kg+ (−35%). Contact your account manager or enquire on any strain to discuss bulk pricing.
+      </div>
+    </div>
+
+    <!-- ENQUIRIES TAB -->
+    <div class="section-block" id="tab-enquiries">
+      <div class="page-header">
+        <div><h1>My Enquiries</h1><p>Track all your submitted enquiries and responses</p></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Strain</th><th>Ref</th><th>Volume</th><th>Submitted</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Dark Matter Mints</strong></td>
+              <td style="color:var(--grey-mid);font-size:12px;">RE-TH-001</td>
+              <td>50 kg</td>
+              <td style="color:var(--grey-mid);">14 Mar 2026</td>
+              <td><span class="status-badge status-replied">✓ Replied</span></td>
+              <td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">View</button></td>
+            </tr>
+            <tr>
+              <td><strong>LA Banana</strong></td>
+              <td style="color:var(--grey-mid);font-size:12px;">RE-TH-005</td>
+              <td>100 kg</td>
+              <td style="color:var(--grey-mid);">15 Mar 2026</td>
+              <td><span class="status-badge status-pending">⏱ Pending</span></td>
+              <td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS TAB -->
+    <div class="section-block" id="tab-documents">
+      <div class="page-header">
+        <div><h1>COA Documents</h1><p>Download certificates of analysis for all verified strains</p></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Strain</th><th>Ref</th><th>Batch</th><th>Lab</th><th>Issued</th><th>Download</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Dark Matter Mints</strong></td><td style="color:var(--grey-mid);font-size:12px;">RE-TH-001</td><td>Batch DMM-26-01</td><td>TNR Bioscience</td><td style="color:var(--grey-mid);">Jan 2026</td><td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📄 Download</button></td></tr>
+            <tr><td><strong>Oh My God</strong></td><td style="color:var(--grey-mid);font-size:12px;">RE-TH-002</td><td>Batch OMG-26-01</td><td>TNR Bioscience</td><td style="color:var(--grey-mid);">Jan 2026</td><td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📄 Download</button></td></tr>
+            <tr><td><strong>Flash Mob</strong></td><td style="color:var(--grey-mid);font-size:12px;">RE-TH-007</td><td>Batch FM-26-01</td><td>TNR Bioscience</td><td style="color:var(--grey-mid);">Feb 2026</td><td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📄 Download</button></td></tr>
+            <tr><td><strong>ML Peachy</strong></td><td style="color:var(--grey-mid);font-size:12px;">RE-TH-003</td><td>Batch MLP-26-01</td><td>TNR Bioscience</td><td style="color:var(--grey-mid);">Jan 2026</td><td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📄 Download</button></td></tr>
+            <tr><td><strong>The Cheetah Girls</strong></td><td style="color:var(--grey-mid);font-size:12px;">RE-TH-004</td><td>Batch TCG-26-01</td><td>TNR Bioscience</td><td style="color:var(--grey-mid);">Jan 2026</td><td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📄 Download</button></td></tr>
+            <tr><td><strong>LA Banana</strong></td><td style="color:var(--grey-mid);font-size:12px;">RE-TH-005</td><td>Batch LAB-26-01</td><td>TNR Bioscience</td><td style="color:var(--grey-mid);">Jan 2026</td><td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📄 Download</button></td></tr>
+            <tr><td><strong>Cherry Punch</strong></td><td style="color:var(--grey-mid);font-size:12px;">RE-TH-006</td><td>Batch CP-26-01</td><td>TNR Bioscience</td><td style="color:var(--grey-mid);">Jan 2026</td><td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📄 Download</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ACCOUNT TAB -->
+    <div class="section-block" id="tab-account">
+      <div class="page-header"><div><h1>My Account</h1><p>Your verified buyer profile</p></div></div>
+      <div style="background:var(--white);border-radius:14px;border:1px solid var(--grey-light);padding:28px;max-width:560px;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--grey-light);">
+          <div style="width:52px;height:52px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--white);">M</div>
+          <div>
+            <div style="font-size:17px;font-weight:700;color:var(--text);">Verified Buyer</div>
+            <div style="font-size:13px;color:var(--grey-mid);">buyer@company.com</div>
+          </div>
+          <div style="margin-left:auto;"><span class="status-badge status-replied">✓ Verified</span></div>
+        </div>
+        <div style="font-size:13px;color:var(--grey-dark);line-height:1.7;">
+          <div style="margin-bottom:10px;"><strong style="color:var(--text);">Account Manager:</strong> Contact buyers@testplatform.com for all order enquiries and pricing discussions.</div>
+          <div><strong style="color:var(--text);">Membership:</strong> Licensed Importer / Buyer — Full catalogue access</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ENQUIRY MODAL -->
+<div class="modal-overlay" id="enquiryModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Submit Enquiry</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-strain-info" id="modalStrainInfo">
+      <strong id="modalStrainName">Strain Name</strong>
+      <span id="modalStrainRef">Ref · Price</span>
+    </div>
+    <form onsubmit="submitEnquiry(event)">
+      <div class="m-form-group">
+        <label>Requested Volume (kg) *</label>
+        <input type="number" placeholder="e.g. 50" min="30" required />
+      </div>
+      <div class="m-form-group">
+        <label>Preferred Delivery Timeframe</label>
+        <select>
+          <option>As soon as possible</option>
+          <option>Within 30 days</option>
+          <option>Within 60 days</option>
+          <option>Within 90 days</option>
+          <option>Flexible</option>
+        </select>
+      </div>
+      <div class="m-form-group">
+        <label>Destination Country / Port</label>
+        <input type="text" placeholder="e.g. Sydney, Australia" />
+      </div>
+      <div class="m-form-group">
+        <label>Additional Notes</label>
+        <textarea placeholder="Any specific requirements, packaging preferences, or questions…"></textarea>
+      </div>
+      <button type="submit" class="modal-submit">Submit Enquiry →</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // TAB SWITCHING
+  function showTab(id) {
+    document.querySelectorAll('.section-block').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+
+  // MODAL
+  function openEnquiry(name, ref, price) {
+    document.getElementById('modalStrainName').textContent = name;
+    document.getElementById('modalStrainRef').textContent = ref + ' · ' + price;
+    document.getElementById('enquiryModal').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('enquiryModal').classList.remove('open');
+  }
+  document.getElementById('enquiryModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  function submitEnquiry(e) {
+    e.preventDefault();
+    closeModal();
+    // Show success feedback
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:76px;right:24px;z-index:300;background:var(--green);color:white;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);animation:fadeUp 0.3s ease;';
+    banner.textContent = '✓ Enquiry submitted — we\'ll respond within 24 hours';
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 4000);
+    // Update count
+    const count = parseInt(document.getElementById('enquiryCount').textContent) + 1;
+    document.getElementById('enquiryCount').textContent = count;
+  }
+</script>
+</body>
+</html>

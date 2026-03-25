@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Test Platform — Thailand Premium Medical Cannabis</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+    --black:        #080d14;
+    --navy:         #0a1628;
+    --navy-mid:     #0f1c2e;
+    --navy-light:   #162436;
+    --surface:      #0d1829;
+    --surface-alt:  #111f30;
+    --green:        #00c853;
+    --green-light:  #69ff9e;
+    --green-dim:    rgba(0,200,83,0.12);
+    --green-border: rgba(0,200,83,0.30);
+    --white:        #ffffff;
+    --text:         #ffffff;
+    --text-dim:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --border:       rgba(255,255,255,0.08);
+    --border-light: rgba(255,255,255,0.05);
+    --card:         #0f1c2e;
+    --card-alt:     #162436;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--black); color: var(--white); line-height: 1.6; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 68px;
+    background: rgba(8,13,20,0.97); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,200,83,0.25);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .nav-logo-mark {
+    width: 36px; height: 36px; background: var(--gold); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px; color: var(--green); letter-spacing: -1px;
+  }
+  .nav-logo-text { font-size: 15px; font-weight: 700; color: var(--white); letter-spacing: 0.5px; line-height: 1.2; }
+  .nav-logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--green-light); letter-spacing: 1.5px; text-transform: uppercase; }
+  .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+  .nav-links a { color: rgba(255,255,255,0.75); text-decoration: none; font-size: 13.5px; font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--green-light); }
+  .nav-cta { background: var(--green); color: var(--black) !important; font-weight: 700 !important; padding: 9px 22px; border-radius: 6px; transition: background 0.2s !important; }
+  .nav-cta:hover { background: var(--gold-light) !important; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    background: linear-gradient(160deg, var(--navy) 0%, var(--black) 60%, #040810 100%);
+    display: flex; align-items: center;
+    padding: 120px 48px 80px; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 70% 50%, rgba(0,200,83,0.12), transparent);
+    pointer-events: none;
+  }
+  .hero-grid {
+    max-width: 1140px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center; gap: 64px; width: 100%;
+  }
+  .hero-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,200,83,0.15); border: 1px solid rgba(0,200,83,0.35);
+    color: var(--green-light); font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .hero-label::before {
+    content: ''; width: 6px; height: 6px; background: var(--gold); border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+  .hero h1 { font-size: clamp(36px,4vw,56px); font-weight: 800; line-height: 1.1; color: var(--white); margin-bottom: 24px; }
+  .hero h1 em { font-style: normal; color: var(--green); }
+  .hero-desc { font-size: 17px; color: rgba(255,255,255,0.70); max-width: 480px; margin-bottom: 40px; line-height: 1.7; }
+  .hero-actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .btn-primary {
+    background: var(--gold); color: var(--green); font-weight: 700; font-size: 15px;
+    padding: 14px 32px; border-radius: 8px; text-decoration: none; border: none; cursor: pointer;
+    transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,200,83,0.35); }
+  .btn-secondary {
+    color: rgba(255,255,255,0.80); font-size: 14px; font-weight: 500; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.25); padding: 13px 24px; border-radius: 8px; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.60); color: var(--white); }
+
+  /* Hero card */
+  .hero-card {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 16px; padding: 36px; backdrop-filter: blur(10px);
+  }
+  .hero-card-title { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 20px; }
+  .trust-row { display: flex; align-items: flex-start; gap: 14px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .trust-row:last-child { border-bottom: none; }
+  .trust-icon { width: 38px; height: 38px; flex-shrink: 0; background: rgba(0,200,83,0.20); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .trust-row-text strong { display: block; font-size: 13.5px; color: var(--white); margin-bottom: 2px; }
+  .trust-row-text span { font-size: 12px; color: rgba(255,255,255,0.50); }
+
+  /* STATS BAR */
+  .stats-bar { background: var(--gold); padding: 20px 48px; }
+  .stats-inner { max-width: 1140px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .stat-item { text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 800; color: var(--green); line-height: 1; }
+  .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(8,13,20,0.70); margin-top: 4px; }
+  .stat-divider { width: 1px; height: 40px; background: rgba(8,13,20,0.20); }
+
+  /* SECTION BASE */
+  section { padding: 96px 48px; }
+  .section-inner { max-width: 1140px; margin: 0 auto; }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--green); margin-bottom: 12px; }
+  .section-title { font-size: clamp(28px,3vw,40px); font-weight: 800; color: var(--white); line-height: 1.15; margin-bottom: 16px; }
+  .section-title em { font-style: normal; color: var(--green); }
+  .section-desc { font-size: 16px; color: var(--text-dim); max-width: 560px; line-height: 1.7; }
+
+  /* ABOUT */
+  .about { background: var(--navy-mid); }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .about-points { margin-top: 32px; display: flex; flex-direction: column; gap: 20px; }
+  .about-point { display: flex; gap: 14px; align-items: flex-start; }
+  .about-point-icon { width: 40px; height: 40px; flex-shrink: 0; background: var(--green); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .about-point strong { display: block; font-size: 14px; color: var(--white); margin-bottom: 3px; }
+  .about-point p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+  .about-right { display: flex; flex-direction: column; gap: 20px; }
+  .about-badge {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 22px 24px; display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04); transition: box-shadow 0.2s;
+  }
+  .about-badge:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .about-badge-icon { width: 48px; height: 48px; flex-shrink: 0; background: var(--green); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .about-badge strong { display: block; font-size: 14px; color: var(--white); margin-bottom: 3px; }
+  .about-badge p { font-size: 12px; color: var(--text-muted); }
+
+  /* HOW IT WORKS */
+  .how { background: var(--card); }
+  .how-tabs { display: flex; gap: 8px; margin-top: 32px; border-bottom: 2px solid var(--grey-light); }
+  .how-tab {
+    padding: 10px 22px; font-size: 14px; font-weight: 600; color: var(--text-muted);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px;
+    transition: all 0.2s; background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .how-tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .how-content { display: none; }
+  .how-content.active { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; margin-top: 40px; }
+  .how-step { background: var(--navy-mid); border-radius: 14px; padding: 28px 22px; }
+  .how-step-num { width: 32px; height: 32px; background: var(--green); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; margin-bottom: 16px; }
+  .how-step h4 { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .how-step p { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; }
+
+  /* COMPLIANCE */
+  .compliance { background: var(--navy-mid); }
+  .compliance-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 48px; }
+  .compliance-card { background: var(--card); border-radius: 14px; padding: 28px; border: 1px solid var(--border); transition: all 0.2s; }
+  .compliance-card:hover { border-color: var(--green-light); box-shadow: 0 4px 20px rgba(8,13,20,0.08); }
+  .compliance-card-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .compliance-card h4 { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .compliance-card p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .compliance-card .tag { display: inline-block; margin-top: 14px; background: rgba(10,22,40,0.10); color: var(--green); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; letter-spacing: 0.5px; }
+
+  /* ACCESS CTA */
+  .access-cta {
+    background: linear-gradient(135deg, var(--green) 0%, #060b11 100%);
+    padding: 96px 48px; text-align: center; position: relative; overflow: hidden;
+  }
+  .access-cta::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(0,200,83,0.15), transparent);
+    pointer-events: none;
+  }
+
+  /* FOOTER */
+  footer { background: #050f07; padding: 48px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .footer-inner { max-width: 1140px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; }
+  .footer-logo { color: var(--white); font-size: 16px; font-weight: 700; }
+  .footer-logo span { color: var(--green); }
+  .footer-links { display: flex; gap: 28px; list-style: none; }
+  .footer-links a { color: rgba(255,255,255,0.40); font-size: 13px; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: rgba(255,255,255,0.80); }
+  .footer-copy { color: rgba(255,255,255,0.25); font-size: 12px; text-align: center; width: 100%; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero-card { display: none; }
+    section { padding: 64px 24px; }
+    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .how-content.active { grid-template-columns: 1fr 1fr; }
+    .compliance-grid { grid-template-columns: 1fr; }
+    .stats-bar { padding: 20px 24px; }
+    footer { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark">RE</div>
+    <div class="nav-logo-text">Test Platform<span>Medical Cannabis Export</span></div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#compliance">Compliance</a></li>
+    <li><a href="remedy_select.html" class="nav-cta">Request Access</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-label">Thailand Medical Cannabis Export</div>
+      <h1>Where Premium Cannabis<br>Meets <em>Global Compliance</em></h1>
+      <p class="hero-desc">
+        Test Platform connects licensed importers with GACP-certified Thai cannabis farms.
+        Every batch independently tested to EU Pharmacopoeia standards — no exceptions.
+      </p>
+      <div class="hero-actions">
+        <a href="remedy_select.html" class="btn-primary">Request Access ›</a>
+        <a href="#how" class="btn-secondary">See How It Works</a>
+      </div>
+    </div>
+    <div>
+      <div class="hero-card">
+        <div class="hero-card-title">Our Credentials</div>
+        <div class="trust-row">
+          <div class="trust-icon">🧪</div>
+          <div class="trust-row-text">
+            <strong>EU Pharmacopoeia Testing</strong>
+            <span>HPLC cannabinoids · GC/MS terpenes · ICP/MS heavy metals</span>
+          </div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon">🌱</div>
+          <div class="trust-row-text">
+            <strong>GACP Certified Farms</strong>
+            <span>Good Agricultural & Collection Practices — export compliant</span>
+          </div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon">📋</div>
+          <div class="trust-row-text">
+            <strong>Full Documentation</strong>
+            <span>COA · Phytosanitary cert · Export licence included</span>
+          </div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon">🌏</div>
+          <div class="trust-row-text">
+            <strong>Export Destinations</strong>
+            <span>Australia (TGA/ODC) · Canada · Germany · Portugal</span>
+          </div>
+        </div>
+        <div class="trust-row">
+          <div class="trust-icon">🔒</div>
+          <div class="trust-row-text">
+            <strong>Discreet B2B Only</strong>
+            <span>Licensed importer verification required for all orders</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat-item"><div class="stat-num">7</div><div class="stat-label">Strains Available</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><div class="stat-num">260 kg</div><div class="stat-label">In Stock Now</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><div class="stat-num">30.4%</div><div class="stat-label">Highest THC</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><div class="stat-num">4 Farms</div><div class="stat-label">Vetted Partners</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><div class="stat-num">100%</div><div class="stat-label">Lab Tested</div></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="reveal">
+        <div class="section-label">About Us</div>
+        <h2 class="section-title">A Trusted Bridge Between<br><em>Farm and Import Market</em></h2>
+        <p class="section-desc">
+          We work directly with a curated network of licensed Thai cannabis farms and handle
+          everything from batch selection and independent laboratory testing to export paperwork
+          and logistics — so our partners can focus on what they do best.
+        </p>
+        <div class="about-points">
+          <div class="about-point">
+            <div class="about-point-icon">🌿</div>
+            <div>
+              <strong>Farm Aggregator</strong>
+              <p>We source across multiple GACP-certified farms to ensure consistent supply and strain variety year-round.</p>
+            </div>
+          </div>
+          <div class="about-point">
+            <div class="about-point-icon">🔬</div>
+            <div>
+              <strong>Independent Lab Verification</strong>
+              <p>Every batch tested by TNR Bioscience Co., Ltd. — Thailand's accredited cannabis testing laboratory — before listing.</p>
+            </div>
+          </div>
+          <div class="about-point">
+            <div class="about-point-icon">✈️</div>
+            <div>
+              <strong>End-to-End Export</strong>
+              <p>We manage all export licensing, documentation, and logistics from Bangkok to your destination.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="about-right reveal">
+        <div class="about-badge">
+          <div class="about-badge-icon">📄</div>
+          <div><strong>Certificate of Analysis</strong><p>Full COA with every shipment — cannabinoids, terpenes, safety panel</p></div>
+        </div>
+        <div class="about-badge">
+          <div class="about-badge-icon">🌱</div>
+          <div><strong>GACP Certification</strong><p>All partner farms operate under Good Agricultural and Collection Practices</p></div>
+        </div>
+        <div class="about-badge">
+          <div class="about-badge-icon">⚖️</div>
+          <div><strong>Phytosanitary Certificate</strong><p>Thai government-issued certificate accompanies all exports</p></div>
+        </div>
+        <div class="about-badge">
+          <div class="about-badge-icon">🚚</div>
+          <div><strong>Temperature Controlled Freight</strong><p>Vacuum-sealed, climate-managed with full insurance coverage</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-label">How It Works</div>
+      <h2 class="section-title">Simple Process,<br><em>Professional Results</em></h2>
+    </div>
+    <div class="how-tabs">
+      <button class="how-tab active" onclick="switchTab('buyers',this)">For Buyers</button>
+      <button class="how-tab" onclick="switchTab('farms',this)">For Farm Partners</button>
+    </div>
+    <div class="how-content active reveal" id="tab-buyers">
+      <div class="how-step"><div class="how-step-num">1</div><h4>Request Access</h4><p>Submit your import licence and business details through our secure portal.</p></div>
+      <div class="how-step"><div class="how-step-num">2</div><h4>Browse & Select</h4><p>View our current strain catalogue with full COA data, THC profiles, and available stock.</p></div>
+      <div class="how-step"><div class="how-step-num">3</div><h4>Confirm Your Order</h4><p>Receive a pro-forma invoice. Secure your allocation with a 30% deposit via wire transfer.</p></div>
+      <div class="how-step"><div class="how-step-num">4</div><h4>We Handle the Rest</h4><p>Full documentation prepared. Air freight dispatched within 7–14 days from Bangkok.</p></div>
+    </div>
+    <div class="how-content" id="tab-farms">
+      <div class="how-step"><div class="how-step-num">1</div><h4>Apply as a Partner</h4><p>Submit your GACP certificate, licences, and production details through the farm portal.</p></div>
+      <div class="how-step"><div class="how-step-num">2</div><h4>Verification</h4><p>Our team reviews your documentation and conducts a brief quality assessment.</p></div>
+      <div class="how-step"><div class="how-step-num">3</div><h4>List Your Stock</h4><p>Once approved, update your available inventory and upcoming harvests in the portal.</p></div>
+      <div class="how-step"><div class="how-step-num">4</div><h4>We Find the Buyers</h4><p>Test Platform manages all buyer relationships, pricing, and export logistics on your behalf.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPLIANCE -->
+<section class="compliance" id="compliance">
+  <div class="section-inner">
+    <div class="reveal" style="text-align:center; max-width:600px; margin:0 auto">
+      <div class="section-label">Compliance & Quality</div>
+      <h2 class="section-title">Built on <em>Uncompromising Standards</em></h2>
+      <p class="section-desc" style="margin:0 auto">
+        Every product meets documentation and testing requirements for medical cannabis import
+        in Australia, Canada, Germany, and Portugal.
+      </p>
+    </div>
+    <div class="compliance-grid reveal">
+      <div class="compliance-card">
+        <span class="compliance-card-icon">🧪</span>
+        <h4>Full Cannabinoid Panel</h4>
+        <p>HPLC analysis covering THC, THCA, CBD, CBDA, CBG, CBGA, CBC, CBDV and THCV — reported as percentage dry weight.</p>
+        <span class="tag">Ph.Eur. 2.2.29</span>
+      </div>
+      <div class="compliance-card">
+        <span class="compliance-card-icon">🌸</span>
+        <h4>Terpene Profiling</h4>
+        <p>GC/MS terpene analysis identifying all major and minor terpenes including total terpene percentage.</p>
+        <span class="tag">Ph.Eur. 2.2.28</span>
+      </div>
+      <div class="compliance-card">
+        <span class="compliance-card-icon">🛡️</span>
+        <h4>Safety Testing</h4>
+        <p>ICP/MS heavy metals, LC/MS/MS mycotoxins and pesticide residue screening, and full microbial enumeration.</p>
+        <span class="tag">Ph.Eur. 2.6.31</span>
+      </div>
+      <div class="compliance-card">
+        <span class="compliance-card-icon">🌿</span>
+        <h4>GACP Farming</h4>
+        <p>All partner farms certified under Good Agricultural and Collection Practices — mandatory for EU and Australian import.</p>
+        <span class="tag">WHO GACP</span>
+      </div>
+      <div class="compliance-card">
+        <span class="compliance-card-icon">📋</span>
+        <h4>Export Documentation</h4>
+        <p>Thai Narcotic Export Licence, Phytosanitary Certificate, and Commercial Invoice with every shipment.</p>
+        <span class="tag">Thai FDA Licensed</span>
+      </div>
+      <div class="compliance-card">
+        <span class="compliance-card-icon">🔬</span>
+        <h4>Independent Laboratory</h4>
+        <p>All testing by TNR Bioscience Co., Ltd. — Thailand's accredited third-party cannabis testing facility.</p>
+        <span class="tag">ISO Accredited</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="access-cta">
+  <div class="section-inner" style="position:relative">
+    <div class="section-label" style="color:var(--gold-light); text-align:center;">Get Started</div>
+    <h2 class="section-title" style="color:white; text-align:center; margin:0 auto 16px;">Ready to Work Together?</h2>
+    <p class="section-desc" style="text-align:center; color:rgba(255,255,255,0.65); margin:0 auto 40px;">
+      Whether you're a licensed importer looking for reliable supply, or a GACP-certified farm
+      seeking export access — we'd like to hear from you.
+    </p>
+    <div style="display:flex; justify-content:center;">
+      <a href="remedy_select.html" class="btn-primary" style="font-size:16px; padding:16px 48px;">
+        Request Access ›
+      </a>
+    </div>
+    <p style="margin-top:20px; font-size:12px; color:rgba(255,255,255,0.30); text-align:center;">
+      For licensed importers and GACP-certified cannabis producers only.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Test <span>Platform</span></div>
+    <ul class="footer-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#compliance">Compliance</a></li>
+      <li><a href="remedy_select.html">Request Access</a></li>
+    </ul>
+  </div>
+  <div class="footer-inner">
+    <p class="footer-copy">© 2026 Test Platform. For licensed B2B partners only. This website does not constitute an offer for sale in jurisdictions where cannabis is not legally permitted for import.</p>
+  </div>
+</footer>
+
+<script>
+  function switchTab(tab, btn) {
+    document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

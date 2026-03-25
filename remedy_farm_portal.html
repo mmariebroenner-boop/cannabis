@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Farm Portal — Test Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+    --black:        #080d14;
+    --navy:         #0a1628;
+    --navy-mid:     #0f1c2e;
+    --navy-light:   #162436;
+    --surface:      #0d1829;
+    --surface-alt:  #111f30;
+    --green:        #00c853;
+    --green-light:  #69ff9e;
+    --green-dim:    rgba(0,200,83,0.12);
+    --green-border: rgba(0,200,83,0.30);
+    --white:        #ffffff;
+    --text:         #ffffff;
+    --text-dim:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --border:       rgba(255,255,255,0.08);
+    --border-light: rgba(255,255,255,0.05);
+    --card:         #0f1c2e;
+    --card-alt:     #162436;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--navy-mid); color: var(--white); line-height: 1.6; }
+
+  /* TOP BAR */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 60px;
+    background: var(--green); border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; padding: 0 28px; gap: 20px;
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .topbar-mark { width: 32px; height: 32px; background: var(--gold); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: var(--green); }
+  .topbar-name { font-size: 14px; font-weight: 700; color: var(--white); }
+  .topbar-name span { color: var(--green-light); font-weight: 400; font-size: 11px; margin-left: 6px; }
+  .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 16px; }
+  .topbar-badge { background: rgba(0,200,83,0.25); border: 1px solid rgba(0,200,83,0.40); color: var(--green-light); font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; }
+  .user-avatar { width: 32px; height: 32px; background: rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: var(--white); }
+  .user-name { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.80); }
+  .logout-btn { font-size: 12px; color: rgba(255,255,255,0.40); text-decoration: none; transition: color 0.2s; }
+  .logout-btn:hover { color: rgba(255,255,255,0.75); }
+
+  .layout { display: flex; padding-top: 60px; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: 220px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--border); position: fixed; top: 60px; left: 0; bottom: 0; overflow-y: auto; padding: 20px 0; }
+  .sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+  .sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); padding: 0 12px; margin-bottom: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13.5px; font-weight: 600; color: var(--text-dim); text-decoration: none; transition: background 0.15s, color 0.15s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
+  .nav-item:hover { background: var(--navy-mid); color: var(--white); }
+  .nav-item.active { background: #0d2018; color: var(--green); }
+  .nav-item .icon { font-size: 16px; width: 22px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--amber); color: var(--white); font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
+
+  .main { margin-left: 220px; flex: 1; padding: 32px 36px; background: var(--black); }
+
+  .page-header { margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .page-header h1 { font-size: 22px; font-weight: 800; color: var(--white); }
+  .page-header p { font-size: 13.5px; color: var(--text-muted); margin-top: 3px; }
+
+  .btn-sm { font-size: 13px; font-weight: 600; padding: 8px 18px; border-radius: 7px; text-decoration: none; border: none; cursor: pointer; font-family: inherit; transition: background 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-green { background: var(--green); color: var(--white); }
+  .btn-green:hover { background: var(--green-mid); }
+  .btn-gold { background: var(--gold); color: var(--green); font-weight: 700; }
+  .btn-gold:hover { background: var(--gold-light); }
+  .btn-outline-sm { background: var(--black); color: var(--white); border: 1.5px solid var(--border); }
+  .btn-outline-sm:hover { border-color: var(--text-muted); }
+
+  /* STATS */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--navy-mid); border-radius: 12px; padding: 20px 22px; border: 1px solid var(--border); }
+  .stat-card .num { font-size: 26px; font-weight: 800; color: var(--white); line-height: 1; margin-bottom: 4px; }
+  .stat-card .num.green { color: var(--green); }
+  .stat-card .num.gold { color: var(--green); }
+  .stat-card .lbl { font-size: 12px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; }
+
+  /* ALERTS */
+  .alert { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 10px; margin-bottom: 12px; font-size: 13.5px; }
+  .alert-amber { background: rgba(255,180,0,0.10); border: 1px solid rgba(255,180,0,0.30); color: #ffd060; }
+  .alert-green { background: #0d2018; border: 1px solid #00c853; color: var(--green); }
+  .alert strong { font-weight: 700; }
+
+  /* TABS */
+  .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--grey-light); margin-bottom: 24px; }
+  .tab { padding: 10px 20px; font-size: 13.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; }
+  .tab:hover { color: var(--white); }
+  .tab.active { color: var(--green); border-color: var(--green); }
+  .section-block { display: none; }
+  .section-block.active { display: block; }
+
+  /* STRAIN TABLE */
+  .table-wrap { background: var(--navy); border-radius: 14px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); padding: 14px 18px; background: var(--navy-mid); border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+  td { padding: 14px 18px; font-size: 13.5px; border-bottom: 1px solid var(--border); color: rgba(255,255,255,0.85); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--navy-light); }
+
+  .status-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px; white-space: nowrap; }
+  .status-live { background: #0d2018; color: var(--green); border: 1px solid #00c853; }
+  .status-pending { background: #fff8e1; color: #8a6820; border: 1px solid #f0d890; }
+  .status-review { background: #f0eaff; color: #6b3fa8; border: 1px solid #d0baf5; }
+  .status-expired { background: #fde8e8; color: var(--red); border: 1px solid #f5c0c0; }
+
+  /* STOCK EDIT */
+  .stock-input { border: 1.5px solid var(--border); border-radius: 7px; padding: 7px 10px; font-size: 13.5px; font-family: inherit; color: var(--white); background: var(--card); width: 80px; transition: border-color 0.2s; outline: none; }
+  .stock-input:focus { border-color: var(--green-light); }
+  .save-stock-btn { font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: var(--green); border: none; color: var(--white); cursor: pointer; font-family: inherit; transition: background 0.2s; margin-left: 6px; }
+  .save-stock-btn:hover { background: var(--green-mid); }
+
+  /* ADD STRAIN FORM */
+  .add-strain-panel { background: var(--card); border-radius: 14px; border: 1px solid var(--border); padding: 28px; }
+  .add-strain-title { font-size: 17px; font-weight: 700; color: var(--white); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--grey-light); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .form-row-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; }
+  .form-group { display: flex; flex-direction: column; gap: 7px; margin-bottom: 18px; }
+  .form-group label { font-size: 12.5px; font-weight: 700; color: rgba(255,255,255,0.80); }
+  .form-group label span { color: var(--green); }
+  .form-group input, .form-group select, .form-group textarea { border: 1.5px solid var(--border); border-radius: 8px; padding: 11px 13px; font-size: 14px; font-family: inherit; color: var(--white); background: var(--card); outline: none; transition: border-color 0.2s; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green-light); }
+
+  .upload-zone { border: 2px dashed rgba(255,255,255,0.15); border-radius: 10px; padding: 22px 16px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: var(--navy-mid); display: block; }
+  .upload-zone:hover { border-color: var(--green-light); background: #0d1f14; }
+  .upload-zone input { display: none; }
+  .upload-icon { font-size: 24px; margin-bottom: 6px; }
+  .upload-title { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+  .upload-hint { font-size: 12px; color: var(--text-muted); }
+
+  .submit-btn { background: var(--green); color: var(--white); font-weight: 700; font-size: 14px; padding: 13px 28px; border-radius: 8px; border: none; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+  .submit-btn:hover { background: var(--green-mid); }
+
+  /* COA MANAGEMENT */
+  .coa-card { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 20px 22px; margin-bottom: 14px; display: flex; align-items: center; gap: 16px; }
+  .coa-icon { font-size: 24px; flex-shrink: 0; }
+  .coa-info { flex: 1; }
+  .coa-strain { font-size: 15px; font-weight: 700; color: var(--white); }
+  .coa-meta { font-size: 12.5px; color: var(--text-muted); }
+  .coa-actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+  /* NOTIFICATIONS */
+  .notif-list { display: flex; flex-direction: column; gap: 12px; }
+  .notif-item { background: var(--card); border-radius: 12px; border: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: flex-start; gap: 14px; }
+  .notif-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .notif-dot.amber { background: var(--amber); }
+  .notif-dot.green { background: var(--green-light); }
+  .notif-dot.blue { background: #5585d4; }
+  .notif-title { font-size: 14px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+  .notif-desc { font-size: 13px; color: var(--text-dim); line-height: 1.55; }
+  .notif-time { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.55); align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border-radius: 18px; padding: 36px; max-width: 500px; width: 90%; max-height: 85vh; overflow-y: auto; animation: popUp 0.25s ease; }
+  @keyframes popUp { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .modal-title { font-size: 19px; font-weight: 800; color: var(--white); }
+  .modal-close { background: none; border: none; font-size: 24px; color: var(--text-muted); cursor: pointer; }
+
+  @media (max-width: 900px) { .sidebar { display: none; } .main { margin-left: 0; padding: 20px; } .stats-row { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 580px) { .stats-row { grid-template-columns: 1fr; } .form-row, .form-row-3 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">
+    <div class="topbar-mark">RE</div>
+    <div class="topbar-name">Test Platform <span>Farm Portal</span></div>
+  </a>
+  <div class="topbar-right">
+    <div class="topbar-badge">Farm Partner</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="user-avatar">F</div>
+      <div class="user-name">My Farm</div>
+      <a href="remedy_login.html" class="logout-btn">Sign out</a>
+    </div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Management</div>
+      <button class="nav-item active" onclick="showTab('strains', this)"><span class="icon">🌿</span> My Strains</button>
+      <button class="nav-item" onclick="showTab('add', this)"><span class="icon">➕</span> Add New Strain</button>
+      <button class="nav-item" onclick="showTab('coas', this)"><span class="icon">📄</span> COA Documents <span class="nav-badge">1</span></button>
+      <button class="nav-item" onclick="showTab('notifications', this)"><span class="icon">🔔</span> Notifications <span class="nav-badge">3</span></button>
+      <button class="nav-item" onclick="showTab('account', this)"><span class="icon">👤</span> My Account</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Support</div>
+      <a href="mailto:farms@testplatform.com" class="nav-item"><span class="icon">💬</span> Contact Us</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- STRAINS TAB -->
+    <div class="section-block active" id="tab-strains">
+      <div class="page-header">
+        <div>
+          <h1>My Strains</h1>
+          <p>Manage your listed strains, stock levels, and COA documents</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn-sm btn-outline-sm" onclick="showTab('coas', document.querySelector('.nav-item:nth-child(3))'))">📄 Manage COAs</button>
+          <button class="btn-sm btn-gold" onclick="showTab('add', this)">+ Add New Strain</button>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card"><div class="num green">4</div><div class="lbl">Active Strains</div></div>
+        <div class="stat-card"><div class="num">260<span style="font-size:14px;font-weight:600"> kg</span></div><div class="lbl">Total Stock</div></div>
+        <div class="stat-card"><div class="num gold">1</div><div class="lbl">Pending Review</div></div>
+        <div class="stat-card"><div class="num" style="color:var(--red);">1</div><div class="lbl">COA Expiring</div></div>
+      </div>
+
+      <div class="alert alert-amber">
+        <span>⚠️</span>
+        <div><strong>Action required:</strong> Your COA for <strong>ML Peachy (Batch MLP-26-01)</strong> is due for renewal within 30 days. Upload a new COA to keep this strain listed.</div>
+      </div>
+      <div class="alert alert-green">
+        <span>✅</span>
+        <div><strong>Flash Mob approved:</strong> Your new strain listing (RE-TH-007) has been approved and is now live in the catalogue.</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Strain</th>
+              <th>Ref Code</th>
+              <th>THC %</th>
+              <th>Stock (kg)</th>
+              <th>COA Status</th>
+              <th>Listing Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Flash Mob</strong></td>
+              <td style="color:var(--grey-mid);font-size:12px;">RE-TH-007</td>
+              <td>27.9%</td>
+              <td>
+                <input class="stock-input" type="number" value="70" id="stock-fm" min="0" />
+                <button class="save-stock-btn" onclick="saveStock('stock-fm', 'Flash Mob')">Save</button>
+              </td>
+              <td><span class="status-badge status-live">✓ Valid</span></td>
+              <td><span class="status-badge status-live">● Live</span></td>
+              <td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;" onclick="openCoaModal('Flash Mob')">Update COA</button></td>
+            </tr>
+            <tr>
+              <td><strong>ML Peachy</strong></td>
+              <td style="color:var(--grey-mid);font-size:12px;">RE-TH-003</td>
+              <td>26.4%</td>
+              <td>
+                <input class="stock-input" type="number" value="50" id="stock-mlp" min="0" />
+                <button class="save-stock-btn" onclick="saveStock('stock-mlp', 'ML Peachy')">Save</button>
+              </td>
+              <td><span class="status-badge status-expired">⚠ Expiring</span></td>
+              <td><span class="status-badge status-live">● Live</span></td>
+              <td><button class="btn-sm btn-gold" style="font-size:12px;padding:5px 12px;" onclick="openCoaModal('ML Peachy')">Upload New COA</button></td>
+            </tr>
+            <tr>
+              <td><strong>LA Banana</strong></td>
+              <td style="color:var(--grey-mid);font-size:12px;">RE-TH-005</td>
+              <td>23.6%</td>
+              <td>
+                <input class="stock-input" type="number" value="140" id="stock-lab" min="0" />
+                <button class="save-stock-btn" onclick="saveStock('stock-lab', 'LA Banana')">Save</button>
+              </td>
+              <td><span class="status-badge status-live">✓ Valid</span></td>
+              <td><span class="status-badge status-live">● Live</span></td>
+              <td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;" onclick="openCoaModal('LA Banana')">Update COA</button></td>
+            </tr>
+            <tr>
+              <td><strong>New Strain (Draft)</strong></td>
+              <td style="color:var(--grey-mid);font-size:12px;">Pending</td>
+              <td>—</td>
+              <td style="color:var(--grey-mid);">—</td>
+              <td><span class="status-badge status-pending">⏱ Awaiting COA</span></td>
+              <td><span class="status-badge status-review">🔍 Under Review</span></td>
+              <td><button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;" onclick="openCoaModal('New Strain')">Upload COA</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:var(--white);border-radius:12px;border:1px solid var(--grey-light);padding:18px 20px;font-size:13px;color:var(--grey-dark);">
+        <strong style="color:var(--text);">ℹ️ Listing rules:</strong> All strains require a valid COA from an ISO/IEC 17025-accredited laboratory. COA documents are cross-checked by our team before a strain goes live or is renewed. Listings are suspended automatically if a COA expires without renewal.
+      </div>
+    </div>
+
+    <!-- ADD STRAIN TAB -->
+    <div class="section-block" id="tab-add">
+      <div class="page-header">
+        <div><h1>Add New Strain</h1><p>Submit a new strain for review — it will be listed once your COA is verified by our team</p></div>
+      </div>
+      <div class="add-strain-panel">
+        <div class="add-strain-title">New Strain Submission</div>
+        <form onsubmit="submitNewStrain(event)">
+          <div class="form-row-3">
+            <div class="form-group">
+              <label>Strain Name <span>*</span></label>
+              <input type="text" placeholder="e.g. Blue Dream" required />
+            </div>
+            <div class="form-group">
+              <label>Type <span>*</span></label>
+              <select required>
+                <option value="">Select…</option>
+                <option>Hybrid</option>
+                <option>Sativa-Dominant</option>
+                <option>Indica-Dominant</option>
+                <option>Pure Sativa</option>
+                <option>Pure Indica</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Available Stock (kg) <span>*</span></label>
+              <input type="number" placeholder="kg" min="10" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>THC % (from COA) <span>*</span></label>
+              <input type="text" placeholder="e.g. 24.5" required />
+            </div>
+            <div class="form-group">
+              <label>CBD %</label>
+              <input type="text" placeholder="e.g. 0.4" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Key Terpenes (if known)</label>
+            <input type="text" placeholder="e.g. Myrcene, Caryophyllene, Limonene" />
+          </div>
+          <div class="form-group">
+            <label>Batch Number <span>*</span></label>
+            <input type="text" placeholder="As it appears on your COA" required />
+          </div>
+          <div class="form-group">
+            <label>Lab Name</label>
+            <input type="text" placeholder="e.g. TNR Bioscience" />
+          </div>
+          <div class="form-group">
+            <label>Brief Description (optional)</label>
+            <textarea placeholder="Short description of the strain's characteristics…" style="min-height:70px;"></textarea>
+          </div>
+
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;padding-top:8px;border-top:2px solid var(--grey-light);padding-top:20px;margin-top:4px;">Upload COA Document</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full COA (PDF) <span>*</span></label>
+              <label class="upload-zone">
+                <input type="file" accept=".pdf" />
+                <div class="upload-icon">📄</div>
+                <div class="upload-title">Upload COA PDF</div>
+                <div class="upload-hint">ISO/IEC 17025-accredited lab only</div>
+              </label>
+            </div>
+            <div class="form-group">
+              <label>Safety Panel Report (if separate)</label>
+              <label class="upload-zone">
+                <input type="file" accept=".pdf" />
+                <div class="upload-icon">🧪</div>
+                <div class="upload-title">Upload Safety Panel</div>
+                <div class="upload-hint">Pesticide · Metals · Microbial (optional if included in COA)</div>
+              </label>
+            </div>
+          </div>
+
+          <div style="background:#f5f8ff;border:1px solid #c8d8f0;border-radius:10px;padding:14px 16px;font-size:13px;color:#3a5080;margin-bottom:24px;">
+            📋 Your submission will enter a review queue. Our team will verify your COA within 24–48 hours before the strain goes live in the catalogue.
+          </div>
+          <button type="submit" class="submit-btn">Submit for Review →</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- COA DOCUMENTS TAB -->
+    <div class="section-block" id="tab-coas">
+      <div class="page-header">
+        <div><h1>COA Documents</h1><p>Manage certificates of analysis for all your strains</p></div>
+      </div>
+
+      <div class="alert alert-amber">
+        <span>⚠️</span>
+        <div><strong>ML Peachy COA expiring:</strong> This COA expires within 30 days. Upload a new one to avoid your listing being suspended.</div>
+      </div>
+
+      <div class="coa-card">
+        <div class="coa-icon">📄</div>
+        <div class="coa-info">
+          <div class="coa-strain">Flash Mob <span style="font-size:11px;color:var(--grey-mid);margin-left:8px;">RE-TH-007 · Batch FM-26-01</span></div>
+          <div class="coa-meta">TNR Bioscience · Issued Feb 2026 · <strong style="color:var(--green-mid);">Valid</strong></div>
+        </div>
+        <div class="coa-actions">
+          <button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📥 View</button>
+          <button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;" onclick="openCoaModal('Flash Mob')">🔄 Replace</button>
+        </div>
+      </div>
+
+      <div class="coa-card" style="border-color:#f5c0c0;">
+        <div class="coa-icon">⚠️</div>
+        <div class="coa-info">
+          <div class="coa-strain">ML Peachy <span style="font-size:11px;color:var(--grey-mid);margin-left:8px;">RE-TH-003 · Batch MLP-26-01</span></div>
+          <div class="coa-meta">TNR Bioscience · Issued Jan 2026 · <strong style="color:var(--red);">Expiring in ~30 days</strong></div>
+        </div>
+        <div class="coa-actions">
+          <button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📥 View</button>
+          <button class="btn-sm btn-gold" style="font-size:12px;padding:5px 12px;" onclick="openCoaModal('ML Peachy')">Upload New COA</button>
+        </div>
+      </div>
+
+      <div class="coa-card">
+        <div class="coa-icon">📄</div>
+        <div class="coa-info">
+          <div class="coa-strain">LA Banana <span style="font-size:11px;color:var(--grey-mid);margin-left:8px;">RE-TH-005 · Batch LAB-26-01</span></div>
+          <div class="coa-meta">TNR Bioscience · Issued Jan 2026 · <strong style="color:var(--green-mid);">Valid</strong></div>
+        </div>
+        <div class="coa-actions">
+          <button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;">📥 View</button>
+          <button class="btn-sm btn-outline-sm" style="font-size:12px;padding:5px 12px;" onclick="openCoaModal('LA Banana')">🔄 Replace</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS TAB -->
+    <div class="section-block" id="tab-notifications">
+      <div class="page-header"><div><h1>Notifications</h1><p>Recent updates from the Test Platform team</p></div></div>
+      <div class="notif-list">
+        <div class="notif-item">
+          <div class="notif-dot amber"></div>
+          <div>
+            <div class="notif-title">COA Renewal Required — ML Peachy</div>
+            <div class="notif-desc">Your Certificate of Analysis for ML Peachy (Batch MLP-26-01) is due to expire within 30 days. Please upload an updated COA to avoid your listing being suspended.</div>
+            <div class="notif-time">2 days ago</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-dot green"></div>
+          <div>
+            <div class="notif-title">Flash Mob Approved & Live</div>
+            <div class="notif-desc">Your new strain submission "Flash Mob" has been verified and is now live in the Test Platform catalogue as RE-TH-007. Buyers can now enquire about this strain.</div>
+            <div class="notif-time">5 days ago</div>
+          </div>
+        </div>
+        <div class="notif-item">
+          <div class="notif-dot blue"></div>
+          <div>
+            <div class="notif-title">Buyer Enquiry — LA Banana</div>
+            <div class="notif-desc">A verified buyer has submitted an enquiry for 100 kg of LA Banana. Our team is handling the response and will be in touch once terms are agreed.</div>
+            <div class="notif-time">1 week ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACCOUNT TAB -->
+    <div class="section-block" id="tab-account">
+      <div class="page-header"><div><h1>My Account</h1><p>Your farm partner profile and documents</p></div></div>
+      <div style="background:var(--white);border-radius:14px;border:1px solid var(--grey-light);padding:28px;max-width:560px;">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--grey-light);">
+          <div style="width:52px;height:52px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:var(--green);">F</div>
+          <div>
+            <div style="font-size:17px;font-weight:700;color:var(--text);">Farm Partner</div>
+            <div style="font-size:13px;color:var(--grey-mid);">farm@myfarm.com</div>
+          </div>
+          <div style="margin-left:auto;"><span class="status-badge status-live">✓ Verified</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:13.5px;color:var(--grey-dark);">
+          <div><strong style="color:var(--text);">Licence:</strong> Thai Production Licence — Active</div>
+          <div><strong style="color:var(--text);">GACP:</strong> Certified — Valid</div>
+          <div><strong style="color:var(--text);">Membership:</strong> Farm Partner — Active since Jan 2026</div>
+          <div><strong style="color:var(--text);">Account Manager:</strong> Contact farms@testplatform.com</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- COA UPLOAD MODAL -->
+<div class="modal-overlay" id="coaModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Upload New COA</div>
+      <button class="modal-close" onclick="closeCoaModal()">×</button>
+    </div>
+    <div style="background:var(--off-white);border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--grey-dark);">
+      Uploading for: <strong id="coaModalStrain" style="color:var(--text);">Strain</strong>
+    </div>
+    <form onsubmit="submitCoa(event)">
+      <div class="form-group">
+        <label>New Batch Number <span style="color:var(--green-mid)">*</span></label>
+        <input type="text" placeholder="As it appears on the new COA" required />
+      </div>
+      <div class="form-group">
+        <label>COA Issue Date <span style="color:var(--green-mid)">*</span></label>
+        <input type="date" required />
+      </div>
+      <div class="form-group">
+        <label>Upload COA (PDF) <span style="color:var(--green-mid)">*</span></label>
+        <label class="upload-zone" id="coaUploadZone">
+          <input type="file" accept=".pdf" id="coaFileInput" />
+          <div class="upload-icon">📄</div>
+          <div class="upload-title" id="coaUploadTitle">Upload COA PDF</div>
+          <div class="upload-hint">ISO/IEC 17025-accredited lab only · PDF · max 10MB</div>
+        </label>
+      </div>
+      <div style="background:#f5f8ff;border:1px solid #c8d8f0;border-radius:10px;padding:14px 16px;font-size:13px;color:#3a5080;margin-bottom:20px;">
+        📋 Your COA will be reviewed by our team within 24 hours. Your strain listing remains active during review.
+      </div>
+      <button type="submit" class="submit-btn" style="width:100%;">Submit for Review →</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function showTab(id, btn) {
+    document.querySelectorAll('.section-block').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    if (btn) btn.classList.add('active');
+  }
+
+  function saveStock(inputId, strainName) {
+    const val = document.getElementById(inputId).value;
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:76px;right:24px;z-index:300;background:var(--green);color:white;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+    banner.textContent = `✓ ${strainName} stock updated to ${val} kg`;
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 3500);
+  }
+
+  function openCoaModal(strainName) {
+    document.getElementById('coaModalStrain').textContent = strainName;
+    document.getElementById('coaModal').classList.add('open');
+  }
+  function closeCoaModal() { document.getElementById('coaModal').classList.remove('open'); }
+  document.getElementById('coaModal').addEventListener('click', e => { if (e.target === document.getElementById('coaModal')) closeCoaModal(); });
+
+  document.getElementById('coaFileInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) {
+      document.getElementById('coaUploadTitle').textContent = file.name;
+      document.getElementById('coaUploadZone').style.borderColor = 'var(--green-light)';
+      document.getElementById('coaUploadZone').style.background = '#0d1f14';
+    }
+  });
+
+  function submitCoa(e) {
+    e.preventDefault();
+    closeCoaModal();
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:76px;right:24px;z-index:300;background:var(--green);color:white;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+    banner.textContent = '✓ COA submitted for review — we\'ll confirm within 24 hours';
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 4000);
+  }
+
+  function submitNewStrain(e) {
+    e.preventDefault();
+    showTab('strains', document.querySelector('.nav-item'));
+    setTimeout(() => {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;top:76px;right:24px;z-index:300;background:var(--green);color:white;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.2);';
+      banner.textContent = '✓ Strain submitted for review — you\'ll hear back within 24-48 hours';
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 4500);
+    }, 100);
+  }
+
+  // File upload feedback for add-strain form
+  document.querySelectorAll('.upload-zone input[type=file]').forEach(input => {
+    if (input.id === 'coaFileInput') return;
+    input.addEventListener('change', e => {
+      const zone = e.target.closest('.upload-zone');
+      const file = e.target.files[0];
+      if (file) { zone.querySelector('.upload-title').textContent = file.name; zone.style.borderColor = 'var(--green-light)'; zone.style.background = '#0d1f14'; }
+    });
+  });
+</script>
+</body>
+</html>

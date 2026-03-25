@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Application Submitted — Test Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+    --black:        #080d14;
+    --navy:         #0a1628;
+    --navy-mid:     #0f1c2e;
+    --navy-light:   #162436;
+    --surface:      #0d1829;
+    --surface-alt:  #111f30;
+    --green:        #00c853;
+    --green-light:  #69ff9e;
+    --green-dim:    rgba(0,200,83,0.12);
+    --green-border: rgba(0,200,83,0.30);
+    --white:        #ffffff;
+    --text:         #ffffff;
+    --text-dim:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --border:       rgba(255,255,255,0.08);
+    --border-light: rgba(255,255,255,0.05);
+    --card:         #0f1c2e;
+    --card-alt:     #162436;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(160deg, var(--navy) 0%, var(--black) 60%, #040810 100%);
+    color: var(--white); min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 68px;
+    border-bottom: 1px solid rgba(0,200,83,0.20);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .nav-logo-mark { width: 36px; height: 36px; background: var(--gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: var(--green); }
+  .nav-logo-text { font-size: 15px; font-weight: 700; color: var(--white); line-height: 1.2; }
+  .nav-logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--green-light); letter-spacing: 1.5px; text-transform: uppercase; }
+
+  .page-wrap {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 60px 24px; position: relative; overflow: hidden;
+  }
+  .page-wrap::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(0,200,83,0.10), transparent);
+    pointer-events: none;
+  }
+
+  /* SUCCESS BADGE */
+  .success-badge {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: rgba(0,200,83,0.15); border: 2px solid rgba(0,200,83,0.40);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; margin: 0 auto 32px;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+  }
+  @keyframes popIn {
+    from { opacity:0; transform: scale(0.5); }
+    to   { opacity:1; transform: scale(1); }
+  }
+
+  .main-card {
+    max-width: 600px; width: 100%;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 24px; padding: 52px 48px; text-align: center;
+    animation: fadeUp 0.55s 0.1s ease both;
+    position: relative; z-index: 1;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(24px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .submitted-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,200,83,0.18); border: 1px solid rgba(0,200,83,0.40);
+    color: #6ee09a; font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .submitted-label::before { content: ''; width: 6px; height: 6px; background: #6ee09a; border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+  .main-card h1 { font-size: clamp(24px, 3.5vw, 34px); font-weight: 800; color: var(--white); margin-bottom: 14px; line-height: 1.2; }
+  .main-card p { font-size: 15.5px; color: rgba(255,255,255,0.60); line-height: 1.75; margin-bottom: 36px; }
+
+  /* TIMER */
+  .timer-row {
+    display: flex; align-items: center; justify-content: center; gap: 16px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 14px; padding: 20px 24px; margin-bottom: 36px;
+  }
+  .timer-icon { font-size: 28px; }
+  .timer-text strong { display: block; font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+  .timer-text span { font-size: 13px; color: rgba(255,255,255,0.50); }
+
+  /* STEPS */
+  .next-steps { text-align: left; margin-bottom: 36px; }
+  .next-steps h3 { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.70); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+  .step-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .step-dot.done { background: rgba(0,200,83,0.25); color: #6ee09a; border: 1px solid rgba(0,200,83,0.40); }
+  .step-dot.pending { background: rgba(0,200,83,0.18); color: var(--green-light); border: 1px solid rgba(0,200,83,0.30); }
+  .step-dot.waiting { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.12); }
+  .step-content strong { display: block; font-size: 13.5px; font-weight: 700; color: var(--white); margin-bottom: 2px; }
+  .step-content span { font-size: 12.5px; color: rgba(255,255,255,0.45); line-height: 1.5; }
+
+  .divider { border: none; border-top: 1px solid rgba(255,255,255,0.10); margin: 28px 0; }
+
+  /* ROLE TAG */
+  .role-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,200,83,0.15); border: 1px solid rgba(0,200,83,0.30);
+    color: var(--green-light); font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 20px; margin-bottom: 28px;
+  }
+
+  .actions { display: flex; flex-direction: column; gap: 12px; align-items: stretch; }
+  .btn-home {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.75); font-size: 14px; font-weight: 600;
+    padding: 13px 24px; border-radius: 8px; text-decoration: none; text-align: center;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-home:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
+
+  .contact-note { margin-top: 24px; font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1.6; }
+  .contact-note a { color: rgba(0,200,83,0.70); text-decoration: none; }
+  .contact-note a:hover { color: var(--green-light); }
+
+  footer { text-align: center; padding: 24px; font-size: 12px; color: rgba(255,255,255,0.20); border-top: 1px solid rgba(255,255,255,0.06); }
+
+  @media (max-width: 640px) {
+    nav { padding: 0 20px; }
+    .main-card { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark">RE</div>
+    <div class="nav-logo-text">Test Platform<span>Application Status</span></div>
+  </a>
+</nav>
+
+<div class="page-wrap">
+  <div class="main-card">
+
+    <div class="success-badge">✅</div>
+
+    <div class="submitted-label">Application Submitted</div>
+
+    <h1>Your application is<br>under review.</h1>
+    <p>Thank you for applying. Our compliance team will verify your documents and get back to you within 48 hours. Keep an eye on your inbox — we'll send your result there.</p>
+
+    <div id="roleTag" class="role-tag"></div>
+
+    <div class="timer-row">
+      <div class="timer-icon">⏱️</div>
+      <div class="timer-text">
+        <strong>Up to 48 hours</strong>
+        <span>Manual review by our compliance team — faster during business hours (Mon–Fri, 9am–6pm BKK)</span>
+      </div>
+    </div>
+
+    <div class="next-steps">
+      <h3>What happens next</h3>
+      <div class="step-row">
+        <div class="step-dot done">✓</div>
+        <div class="step-content">
+          <strong>Application received</strong>
+          <span>Your documents are in our review queue. Confirmation email sent.</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot pending">2</div>
+        <div class="step-content">
+          <strong>Licence & document verification</strong>
+          <span>Our team cross-checks your licence and certification details. This typically takes a few hours to 1 business day.</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot waiting">3</div>
+        <div class="step-content">
+          <strong>Approval email sent</strong>
+          <span>If approved, you'll receive an email with your login credentials and next steps.</span>
+        </div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot waiting">4</div>
+        <div class="step-content" id="step4Content">
+          <strong>Portal access unlocked</strong>
+          <span>Log in to your portal and get started.</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="actions">
+      <a href="index.html" class="btn-home">← Return to Homepage</a>
+    </div>
+
+    <p class="contact-note">
+      Questions about your application?<br>
+      Email us at <a href="mailto:applications@testplatform.com">applications@testplatform.com</a>
+    </p>
+
+  </div>
+</div>
+
+<footer>© 2026 Test Platform · Bangkok, Thailand</footer>
+
+<script>
+  // Detect role from URL param
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get('role');
+
+  const roleTag = document.getElementById('roleTag');
+  const step4 = document.getElementById('step4Content');
+
+  if (role === 'farm') {
+    roleTag.textContent = '🌿  Farm Partner Application';
+    step4.innerHTML = '<strong>Farm portal access unlocked</strong><span>Manage your strains, stock, and COA uploads from your dedicated farm dashboard.</span>';
+  } else {
+    roleTag.textContent = '🏢  Buyer Application';
+    step4.innerHTML = '<strong>Full catalogue access unlocked</strong><span>View all 7 strains, COA documents, wholesale pricing, and submit enquiries.</span>';
+  }
+</script>
+</body>
+</html>

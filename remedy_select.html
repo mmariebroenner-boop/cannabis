@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Request Access — Test Platform</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+    --black:        #080d14;
+    --navy:         #0a1628;
+    --navy-mid:     #0f1c2e;
+    --navy-light:   #162436;
+    --surface:      #0d1829;
+    --surface-alt:  #111f30;
+    --green:        #00c853;
+    --green-light:  #69ff9e;
+    --green-dim:    rgba(0,200,83,0.12);
+    --green-border: rgba(0,200,83,0.30);
+    --white:        #ffffff;
+    --text:         #ffffff;
+    --text-dim:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --border:       rgba(255,255,255,0.08);
+    --border-light: rgba(255,255,255,0.05);
+    --card:         #0f1c2e;
+    --card-alt:     #162436;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: linear-gradient(160deg, var(--navy) 0%, var(--black) 60%, #040810 100%);
+    color: var(--white);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 68px;
+    background: rgba(8,13,20,0.97); backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0,200,83,0.25);
+  }
+  .nav-logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .nav-logo-mark {
+    width: 36px; height: 36px; background: var(--gold); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 16px; color: var(--green); letter-spacing: -1px;
+  }
+  .nav-logo-text { font-size: 15px; font-weight: 700; color: var(--white); letter-spacing: 0.5px; line-height: 1.2; }
+  .nav-logo-text span { display: block; font-size: 10px; font-weight: 400; color: var(--green-light); letter-spacing: 1.5px; text-transform: uppercase; }
+  .nav-back {
+    display: flex; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.65); text-decoration: none; font-size: 13.5px;
+    font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--green-light); }
+  .nav-back svg { width: 16px; height: 16px; }
+
+  /* MAIN CONTENT */
+  .page-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 24px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-wrap::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(0,200,83,0.10), transparent);
+    pointer-events: none;
+  }
+
+  /* HEADER */
+  .page-header {
+    text-align: center;
+    margin-bottom: 56px;
+    position: relative; z-index: 1;
+  }
+  .page-header .step-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,200,83,0.15); border: 1px solid rgba(0,200,83,0.35);
+    color: var(--green-light); font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+  }
+  .page-header h1 {
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .page-header h1 em { font-style: normal; color: var(--green); }
+  .page-header p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.60);
+    max-width: 420px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* CARDS */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    max-width: 860px;
+    width: 100%;
+    position: relative; z-index: 1;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
+    padding: 44px 40px 40px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.25s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(0,200,83,0.50);
+    background: rgba(255,255,255,0.07);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.40), 0 0 0 1px rgba(0,200,83,0.20);
+  }
+  .card:hover::before { opacity: 1; }
+
+  /* BUYER card */
+  .card-buyer::before {
+    background: radial-gradient(ellipse 80% 60% at 20% 0%, rgba(0,200,83,0.15), transparent);
+  }
+  /* FARM card */
+  .card-farm::before {
+    background: radial-gradient(ellipse 80% 60% at 80% 0%, rgba(0,200,83,0.12), transparent);
+  }
+
+  .card-icon {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .card-buyer .card-icon { background: rgba(0,200,83,0.20); border: 1px solid rgba(0,200,83,0.35); }
+  .card-farm  .card-icon { background: rgba(0,200,83,0.18); border: 1px solid rgba(0,200,83,0.35); }
+
+  .card-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .card-desc {
+    font-size: 14px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.65;
+    margin-bottom: 32px;
+    flex: 1;
+  }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 36px;
+  }
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .card-buyer .tag { background: rgba(0,200,83,0.18); color: #6ee09a; border: 1px solid rgba(0,200,83,0.30); }
+  .card-farm  .tag { background: rgba(0,200,83,0.15); color: var(--green-light); border: 1px solid rgba(0,200,83,0.28); }
+
+  .card-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 700; letter-spacing: 0.3px;
+    padding: 12px 24px; border-radius: 8px;
+    transition: background 0.2s, transform 0.2s;
+    align-self: stretch; justify-content: center;
+    text-align: center;
+  }
+  .card-buyer .card-cta {
+    background: var(--green-light); color: var(--white);
+  }
+  .card-buyer:hover .card-cta { background: #34c068; }
+  .card-farm .card-cta {
+    background: var(--gold); color: var(--green);
+  }
+  .card-farm:hover .card-cta { background: var(--gold-light); }
+
+  .card-cta svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* DIVIDER */
+  .cards-or {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px; height: 36px;
+    background: rgba(8,13,20,0.95);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    z-index: 2;
+  }
+
+  /* FOOTER NOTE */
+  .footer-note {
+    margin-top: 48px;
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    position: relative; z-index: 1;
+  }
+  .footer-note a {
+    color: rgba(0,200,83,0.70);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .footer-note a:hover { color: var(--green-light); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px 48px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+    letter-spacing: 0.3px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 680px) {
+    nav { padding: 0 20px; }
+    .cards { grid-template-columns: 1fr; gap: 20px; }
+    .cards-or { display: none; }
+    .card { padding: 32px 28px; }
+    .page-header { margin-bottom: 40px; }
+  }
+
+  /* ENTRANCE ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .page-header { animation: fadeUp 0.55s ease both; }
+  .card-buyer  { animation: fadeUp 0.55s 0.10s ease both; }
+  .card-farm   { animation: fadeUp 0.55s 0.20s ease both; }
+  .footer-note { animation: fadeUp 0.55s 0.30s ease both; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <div class="nav-logo-mark">RE</div>
+    <div class="nav-logo-text">
+      Test Platform
+      <span>Thailand Premium Cannabis</span>
+    </div>
+  </a>
+  <a href="index.html" class="nav-back">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M10 3L5 8l5 5"/>
+    </svg>
+    Back to Home
+  </a>
+</nav>
+
+<!-- MAIN -->
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="step-label">Step 1 of 2 &nbsp;·&nbsp; Select Your Role</div>
+    <h1>How are you <em>joining us?</em></h1>
+    <p>Tell us who you are so we can show you the right application and get you access to what matters.</p>
+  </div>
+
+  <div class="cards" style="position:relative;">
+
+    <!-- BUYER CARD -->
+    <a href="remedy_buyer.html" class="card card-buyer">
+      <div class="card-icon">🏢</div>
+      <div class="card-title">I'm a Licensed Importer / Buyer</div>
+      <div class="card-desc">
+        Access our verified strain catalogue, wholesale pricing, and COA documentation. Built for importers, distributors, and licensed dispensaries sourcing from Thailand.
+      </div>
+      <div class="card-tags">
+        <span class="tag">Wholesale</span>
+        <span class="tag">Import Docs</span>
+        <span class="tag">Lab Reports</span>
+        <span class="tag">Pricing</span>
+      </div>
+      <div class="card-cta">
+        Continue as Buyer
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 8h10M9 4l4 4-4 4"/>
+        </svg>
+      </div>
+    </a>
+
+    <!-- OR DIVIDER -->
+    <div class="cards-or">or</div>
+
+    <!-- FARM CARD -->
+    <a href="remedy_farm.html" class="card card-farm">
+      <div class="card-icon">🌿</div>
+      <div class="card-title">I'm a Cannabis Producer / Farm</div>
+      <div class="card-desc">
+        List your strains, submit COA documents, and manage your stock availability. We connect verified GACP farms directly with international buyers.
+      </div>
+      <div class="card-tags">
+        <span class="tag">Stock Management</span>
+        <span class="tag">COA Upload</span>
+        <span class="tag">GACP</span>
+        <span class="tag">Export</span>
+      </div>
+      <div class="card-cta">
+        Continue as Farm
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 8h10M9 4l4 4-4 4"/>
+        </svg>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="footer-note">
+    Already have an account? <a href="#">Sign in here</a>
+    &nbsp;·&nbsp;
+    Questions? <a href="mailto:contact@testplatform.com">Contact us</a>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  © 2026 Test Platform &nbsp;·&nbsp; Bangkok, Thailand &nbsp;·&nbsp; All applications are subject to verification and approval.
+</footer>
+
+</body>
+</html>

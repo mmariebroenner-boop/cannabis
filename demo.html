@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Test Platform — Site Demo</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+    --black:        #080d14;
+    --navy:         #0a1628;
+    --navy-mid:     #0f1c2e;
+    --navy-light:   #162436;
+    --surface:      #0d1829;
+    --surface-alt:  #111f30;
+    --green:        #00c853;
+    --green-light:  #69ff9e;
+    --green-dim:    rgba(0,200,83,0.12);
+    --green-border: rgba(0,200,83,0.30);
+    --white:        #ffffff;
+    --text:         #ffffff;
+    --text-dim:     rgba(255,255,255,0.65);
+    --text-muted:   rgba(255,255,255,0.35);
+    --border:       rgba(255,255,255,0.08);
+    --border-light: rgba(255,255,255,0.05);
+    --card:         #0f1c2e;
+    --card-alt:     #162436;
+  }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--navy-mid);
+    color: var(--white);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--green);
+    padding: 32px 40px 28px;
+    border-bottom: 3px solid var(--gold);
+  }
+  .header-top { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+  .logo-mark { width: 40px; height: 40px; background: var(--gold); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: var(--green); flex-shrink: 0; }
+  .header h1 { font-size: 20px; font-weight: 800; color: var(--white); }
+  .header h1 span { color: var(--green-light); font-weight: 400; font-size: 13px; display: block; margin-top: 2px; }
+  .header-desc { font-size: 13.5px; color: rgba(255,255,255,0.55); max-width: 600px; line-height: 1.6; margin-top: 4px; }
+
+  /* FLOW INDICATOR */
+  .flow-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    font-size: 12px; color: var(--text-muted); font-weight: 600;
+  }
+  .flow-step { color: var(--green); font-weight: 700; }
+  .flow-arrow { color: var(--text-muted); font-size: 14px; }
+
+  /* MAIN GRID */
+  .main { padding: 32px 40px; max-width: 1100px; }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 2.5px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px;
+    margin-top: 28px;
+  }
+  .section-label:first-child { margin-top: 0; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 8px; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    text-decoration: none;
+    display: block;
+  }
+  .card:hover { box-shadow: 0 8px 28px rgba(8,13,20,0.12); transform: translateY(-2px); }
+
+  .card-top {
+    padding: 18px 20px 14px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .card-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .card-icon.green { background: #0d2018; }
+  .card-icon.gold  { background: #fdf8ee; }
+  .card-icon.blue  { background: #eef2ff; }
+  .card-icon.grey  { background: var(--navy-mid); }
+
+  .card-info { flex: 1; }
+  .card-title { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+  .card-file  { font-size: 11px; color: var(--text-muted); font-family: monospace; margin-bottom: 6px; }
+  .card-desc  { font-size: 13px; color: #5a6a5e; line-height: 1.55; }
+
+  .card-footer {
+    padding: 10px 20px;
+    background: var(--navy-mid);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-tag {
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 20px;
+  }
+  .tag-public   { background: #0d2018; color: var(--green); }
+  .tag-apply    { background: #fff8e1; color: #8a6820; }
+  .tag-system   { background: #f0eaff; color: #6b3fa8; }
+  .tag-buyer    { background: #eef8ff; color: #2563a8; }
+  .tag-farm     { background: #fdf5e8; color: #8a5c00; }
+  .tag-portal   { background: #0d2018; color: var(--green); border: 1px solid #00c853; }
+
+  .open-btn {
+    font-size: 12px; font-weight: 700; color: var(--green);
+    display: flex; align-items: center; gap: 4px;
+  }
+
+  /* STEP BADGE */
+  .step-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; background: var(--green); border-radius: 50%;
+    font-size: 11px; font-weight: 800; color: var(--white); flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-badge.gold { background: var(--gold); color: var(--green); }
+
+  /* LEGEND */
+  .legend {
+    margin-top: 32px; padding: 18px 20px;
+    background: var(--card); border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+  }
+  .legend-title { font-size: 12px; font-weight: 700; color: var(--white); margin-right: 4px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5a6a5e; }
+
+  @media (max-width: 680px) {
+    .header { padding: 24px 20px; }
+    .flow-bar { padding: 12px 20px; }
+    .main { padding: 20px; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo-mark">RE</div>
+    <div>
+      <h1>Test Platform <span>Website Demo — All Pages</span></h1>
+    </div>
+  </div>
+  <p class="header-desc">Click any card to open that page. This is a frontend demo — forms and logins are simulated. The full site has 8 pages covering the complete user journey from homepage to member portal.</p>
+</div>
+
+<div class="flow-bar">
+  <span class="flow-step">Homepage</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">Select Role</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">Apply (Buyer or Farm)</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">Pending Review</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">Login</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-step">Buyer Portal or Farm Portal</span>
+</div>
+
+<div class="main">
+
+  <!-- PUBLIC PAGES -->
+  <div class="section-label">Public Pages — Anyone Can See These</div>
+  <div class="card-grid">
+
+    <a href="index.html" class="card">
+      <div class="card-top">
+        <div class="card-icon green">🏠</div>
+        <div class="card-info">
+          <div class="card-title">Homepage</div>
+          <div class="card-file">index.html</div>
+          <div class="card-desc">Public-facing landing page. Brand overview, how it works, compliance. "Request Access" button leads to role selection.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-public">Public</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a href="remedy_select.html" class="card">
+      <div class="card-top">
+        <div class="card-icon green">🔀</div>
+        <div class="card-info">
+          <div class="card-title">Role Selection</div>
+          <div class="card-file">remedy_select.html</div>
+          <div class="card-desc">Visitor chooses whether they are a Licensed Buyer or a Cannabis Farm. Routes to the correct application page.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-public">Public</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- APPLICATION PAGES -->
+  <div class="section-label">Application Pages — Before Account Approval</div>
+  <div class="card-grid">
+
+    <a href="remedy_buyer.html" class="card">
+      <div class="card-top">
+        <div class="card-icon blue">🏢</div>
+        <div class="card-info">
+          <div class="card-title">Buyer Application</div>
+          <div class="card-file">remedy_buyer.html</div>
+          <div class="card-desc">Shows 3 strain teasers, 4 locked strains. Application form with import licence + business registration upload. Submitting goes to pending page.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-apply">Application Required</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a href="remedy_farm.html" class="card">
+      <div class="card-top">
+        <div class="card-icon gold">🌿</div>
+        <div class="card-info">
+          <div class="card-title">Farm Application</div>
+          <div class="card-file">remedy_farm.html</div>
+          <div class="card-desc">Farm partner application with production licence, GACP certificate, and strain submission. Add multiple strains before submitting.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-apply">Application Required</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a href="remedy_pending.html?role=buyer" class="card">
+      <div class="card-top">
+        <div class="card-icon grey">⏳</div>
+        <div class="card-info">
+          <div class="card-title">Pending Approval</div>
+          <div class="card-file">remedy_pending.html</div>
+          <div class="card-desc">Shown after submitting an application. Explains the 48-hour review process and what happens next. Works for both buyer and farm roles.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-system">System Page</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- LOGIN -->
+  <div class="section-label">Login — Approved Members Only</div>
+  <div class="card-grid">
+
+    <a href="remedy_login.html" class="card">
+      <div class="card-top">
+        <div class="card-icon grey">🔐</div>
+        <div class="card-info">
+          <div class="card-title">Member Login</div>
+          <div class="card-file">remedy_login.html</div>
+          <div class="card-desc">Login page for verified buyers and farm partners. Select your role (Buyer or Farm), enter any email and password in demo mode, and it routes you to the right portal.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-system">Members Only</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- MEMBER PORTALS -->
+  <div class="section-label">Member Portals — Post-Login (Verified Only)</div>
+  <div class="card-grid">
+
+    <a href="remedy_buyer_portal.html" class="card">
+      <div class="card-top">
+        <div class="card-icon blue">📦</div>
+        <div class="card-info">
+          <div class="card-title">Buyer Portal</div>
+          <div class="card-file">remedy_buyer_portal.html</div>
+          <div class="card-desc">Full dashboard for approved buyers. All 7 strains unlocked with real lab data, wholesale pricing, COA downloads, enquiry system, and enquiry tracker.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-portal">Verified Buyers</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a href="remedy_farm_portal.html" class="card">
+      <div class="card-top">
+        <div class="card-icon gold">🌾</div>
+        <div class="card-info">
+          <div class="card-title">Farm Portal</div>
+          <div class="card-file">remedy_farm_portal.html</div>
+          <div class="card-desc">Dashboard for approved farm partners. Edit stock quantities live, add new strains, upload COA documents for approval, view notifications and COA expiry alerts.</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="card-tag tag-farm">Verified Farms</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <span class="legend-title">Tags:</span>
+    <span class="legend-item"><span class="card-tag tag-public">Public</span> No login needed</span>
+    <span class="legend-item"><span class="card-tag tag-apply">Application Required</span> Must apply first</span>
+    <span class="legend-item"><span class="card-tag tag-system">System Page</span> Auto-redirect page</span>
+    <span class="legend-item"><span class="card-tag tag-portal">Verified Only</span> Post-login access</span>
+  </div>
+
+</div>
+
+</body>
+</html>
