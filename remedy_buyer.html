@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Buyer Access — Test Platform</title>
+<title>Buyer Access — Remedy Enterprise</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -429,11 +430,11 @@
         <div class="form-row">
           <div class="form-group">
             <label>Company / Business Name <span>*</span></label>
-            <input type="text" placeholder="Your registered company name" required />
+            <input type="text" name="company_name" placeholder="Your registered company name" required />
           </div>
           <div class="form-group">
             <label>Country of Operation <span>*</span></label>
-            <select required>
+            <select name="country" required>
               <option value="">Select country…</option>
               <option>Australia</option>
               <option>Canada</option>
@@ -448,11 +449,11 @@
         <div class="form-row">
           <div class="form-group">
             <label>Contact Name <span>*</span></label>
-            <input type="text" placeholder="Full name" required />
+            <input type="text" name="contact_name" placeholder="Full name" required />
           </div>
           <div class="form-group">
             <label>Business Email <span>*</span></label>
-            <input type="email" placeholder="you@company.com" required />
+            <input type="email" name="email" placeholder="you@company.com" required />
           </div>
         </div>
 
@@ -462,16 +463,16 @@
         <div class="form-row">
           <div class="form-group">
             <label>Import Licence Number <span>*</span></label>
-            <input type="text" placeholder="Your import licence number" required />
+            <input type="text" name="licence_number" placeholder="Your import licence number" required />
           </div>
           <div class="form-group">
             <label>Issuing Regulatory Authority <span>*</span></label>
-            <input type="text" placeholder="e.g. TGA, Health Canada, BfArM" required />
+            <input type="text" name="regulatory_authority" placeholder="e.g. TGA, Health Canada, BfArM" required />
           </div>
         </div>
         <div class="form-group">
           <label>Expected Order Volume <span>*</span></label>
-          <select required>
+          <select name="order_volume" required>
             <option value="">Select volume range…</option>
             <option>30–50 kg per order</option>
             <option>50–100 kg per order</option>
@@ -482,7 +483,7 @@
         </div>
         <div class="form-group">
           <label>Additional Notes (optional)</label>
-          <textarea placeholder="Any specific strains, requirements, or questions you'd like us to know…"></textarea>
+          <textarea name="notes" placeholder="Any specific strains, requirements, or questions you'd like us to know…"></textarea>
         </div>
 
         <hr class="form-divider" />
@@ -592,8 +593,12 @@
     });
   });
 
-  // Form submit → redirect to pending page
-  function handleSubmit(e) {
+  // ── Supabase ────────────────────────────────────────────────────────────────
+  const SUPABASE_URL      = 'https://qtwvpaijtuvpimwiuomk.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0d3ZwYWlqdHV2cGltd2l1b21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzMzMDcsImV4cCI6MjA5MDA0OTMwN30.e3fQgEZAyS7EM_2P7lII02PxlOjfNTyUZOOhsooMZlM';
+  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     const checkbox = document.getElementById('buyerAgree');
     const errMsg   = document.getElementById('buyerAgreeError');
@@ -604,6 +609,36 @@
       return;
     }
     errMsg.style.display = 'none';
+
+    const form = document.getElementById('buyerForm');
+    const fd   = new FormData(form);
+
+    const payload = {
+      company_name:         fd.get('company_name') || '',
+      country:              fd.get('country') || '',
+      contact_name:         fd.get('contact_name') || '',
+      email:                fd.get('email') || '',
+      licence_number:       fd.get('licence_number') || '',
+      regulatory_authority: fd.get('regulatory_authority') || '',
+      order_volume:         fd.get('order_volume') || '',
+      notes:                fd.get('notes') || '',
+      status:               'pending',
+    };
+
+    const btn = form.querySelector('.submit-btn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    const { error } = await _supabase.from('buyer_applications').insert([payload]);
+
+    if (error) {
+      console.error('Supabase error:', error);
+      btn.textContent = 'Submit Application ›';
+      btn.disabled = false;
+      alert('There was an error submitting your application. Please try again.\n\n' + error.message);
+      return;
+    }
+
     window.location.href = 'remedy_pending.html?role=buyer';
   }
 </script>

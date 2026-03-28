@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Farm Partner Application — Test Platform</title>
+<title>Farm Partner Application — Remedy Enterprise</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -250,21 +251,21 @@
         <div class="form-row">
           <div class="form-group">
             <label>Farm / Company Name <span>*</span></label>
-            <input type="text" placeholder="Registered company or farm name" required />
+            <input type="text" name="company_name" placeholder="Registered company or farm name" required />
           </div>
           <div class="form-group">
             <label>Province / Location <span>*</span></label>
-            <input type="text" placeholder="e.g. Chiang Mai, Chiang Rai…" required />
+            <input type="text" name="location" placeholder="e.g. Chiang Mai, Chiang Rai…" required />
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label>Contact Name <span>*</span></label>
-            <input type="text" placeholder="Full name of primary contact" required />
+            <input type="text" name="contact_name" placeholder="Full name of primary contact" required />
           </div>
           <div class="form-group">
             <label>Business Email <span>*</span></label>
-            <input type="email" placeholder="you@yourfarm.com" required />
+            <input type="email" name="email" placeholder="you@yourfarm.com" required />
           </div>
         </div>
 
@@ -273,16 +274,16 @@
         <div class="form-row">
           <div class="form-group">
             <label>Thai Production Licence Number <span>*</span></label>
-            <input type="text" placeholder="Your production licence number" required />
+            <input type="text" name="licence_number" placeholder="Your production licence number" required />
           </div>
           <div class="form-group">
             <label>GACP Certificate Number <span>*</span></label>
-            <input type="text" placeholder="Your GACP certification number" required />
+            <input type="text" name="gacp_number" placeholder="Your GACP certification number" required />
           </div>
         </div>
         <div class="form-group">
           <label>Total Annual Production Capacity</label>
-          <select>
+          <select name="annual_capacity">
             <option value="">Select range…</option>
             <option>Under 100 kg/year</option>
             <option>100–500 kg/year</option>
@@ -358,7 +359,7 @@
 
         <div class="form-group">
           <label>Additional Information (optional)</label>
-          <textarea placeholder="Any additional details about your operation, preferred markets, or questions…"></textarea>
+          <textarea name="notes" placeholder="Any additional details about your operation, preferred markets, or questions…"></textarea>
         </div>
 
         <div class="clickwrap">
@@ -475,7 +476,12 @@
     });
   }
 
-  function handleSubmit(e) {
+  // ── Supabase ────────────────────────────────────────────────────────────────
+  const SUPABASE_URL      = 'https://qtwvpaijtuvpimwiuomk.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF0d3ZwYWlqdHV2cGltd2l1b21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NzMzMDcsImV4cCI6MjA5MDA0OTMwN30.e3fQgEZAyS7EM_2P7lII02PxlOjfNTyUZOOhsooMZlM';
+  const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function handleSubmit(e) {
     e.preventDefault();
     const checkbox = document.getElementById('farmAgree');
     const errMsg   = document.getElementById('farmAgreeError');
@@ -486,6 +492,52 @@
       return;
     }
     errMsg.style.display = 'none';
+
+    // Collect form data
+    const form = document.getElementById('farmForm');
+    const fd   = new FormData(form);
+
+    // Collect strain entries
+    const strains = [];
+    document.querySelectorAll('.strain-entry').forEach(entry => {
+      const inputs = entry.querySelectorAll('input[type=text], input[type=number]');
+      if (inputs[0] && inputs[0].value.trim()) {
+        strains.push({
+          name:  inputs[0].value.trim(),
+          thc:   inputs[1] ? inputs[1].value.trim() : '',
+          stock: inputs[2] ? inputs[2].value.trim() : '',
+        });
+      }
+    });
+
+    const payload = {
+      company_name:    fd.get('company_name') || '',
+      location:        fd.get('location') || '',
+      contact_name:    fd.get('contact_name') || '',
+      email:           fd.get('email') || '',
+      licence_number:  fd.get('licence_number') || '',
+      gacp_number:     fd.get('gacp_number') || '',
+      annual_capacity: fd.get('annual_capacity') || '',
+      strains:         strains,
+      notes:           fd.get('notes') || '',
+      status:          'pending',
+    };
+
+    // Show loading state
+    const btn = form.querySelector('.submit-btn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    const { error } = await _supabase.from('farm_applications').insert([payload]);
+
+    if (error) {
+      console.error('Supabase error:', error);
+      btn.textContent = 'Submit Application ›';
+      btn.disabled = false;
+      alert('There was an error submitting your application. Please try again.\n\n' + error.message);
+      return;
+    }
+
     window.location.href = 'remedy_pending.html?role=farm';
   }
 </script>
